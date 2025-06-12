@@ -1,0 +1,8 @@
+---
+
+- hosts: game
+  roles:
+    - role: geerlingguy.docker
+      become: yes
+    - role: wings
+      become: yes

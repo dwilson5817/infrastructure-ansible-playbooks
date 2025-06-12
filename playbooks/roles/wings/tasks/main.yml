@@ -1,0 +1,69 @@
+---
+
+- name: Create Wings configuration directory
+  ansible.builtin.file:
+    path: /etc/pterodactyl
+    state: directory
+
+- name: Write Wings configuration if it doesn't already exist
+  ansible.builtin.copy:
+    content: |+
+      debug: false
+      uuid: {{ wings_uuid }}
+      token_id: {{ wings_token_id }}
+      token: {{ wings_token }}
+      api:
+        host: 0.0.0.0
+        port: 8080
+        ssl:
+          enabled: true
+          cert: /etc/letsencrypt/certs/{{ ansible_host }}/fullchain.pem
+          key: /etc/letsencrypt/keys/{{ ansible_host }}.pem
+        upload_limit: 100
+      system:
+        data: /var/lib/pterodactyl/volumes
+        sftp:
+          bind_port: 2022
+      allowed_mounts: []
+      remote: 'https://panel.minersrealm.net'
+    dest: /etc/pterodactyl/config.yml
+    force: no
+
+- name: Download latest Wings binary
+  ansible.builtin.get_url:
+    url: https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_amd64
+    dest: /usr/local/bin/wings
+    mode: u+x
+
+- name: Create Wings service file
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Pterodactyl Wings Daemon
+      After=docker.service
+      Requires=docker.service
+      PartOf=docker.service
+
+      [Service]
+      User=root
+      WorkingDirectory=/etc/pterodactyl
+      LimitNOFILE=4096
+      PIDFile=/var/run/wings/daemon.pid
+      ExecStart=/usr/local/bin/wings
+      Restart=on-failure
+      StartLimitInterval=180
+      StartLimitBurst=30
+      RestartSec=5s
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/wings.service
+
+# This should be idempotent, but the general playbook already issues the same TLS certificate so it's not possible to
+# have a handler notify on change (because by the time this playbook runs it should always have an up-to-date TLS cert)
+# so for now we always restart as restarting Wings does not bounce the containers so should be safe.
+- name: Enable Wings on boot and restart it to pick up new binary and configuration
+  ansible.builtin.systemd_service:
+    name: wings
+    state: restarted
+    enabled: true
