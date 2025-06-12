@@ -1,0 +1,10 @@
+execute-ansible:
+  stage: deploy
+  image: python:3.13.4
+  script:
+
+    # Install Python requirements (including Ansible)
+    - pip install -r requirements.txt
+
+    # Install Ansible roles and collections
+    - ansible-galaxy install -r requirements.yml
