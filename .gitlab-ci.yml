@@ -9,6 +9,12 @@ execute-ansible:
     # This will be signed by Vault
     - ssh-keygen -t rsa -q -f "$HOME/.ssh/id_rsa" -N ""
 
+    # curl and jq are used for making API request to Vault
+    - apt update && apt install -y curl jq
+
+    # Temporary debugging output
+    - 'curl --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"gitlab\" }" https://vault.dylanw.net/v1/auth/gitlab-jwt/login'
+
     # Use GitLab JWT token to obtain a Vault token
     - 'export VAULT_TOKEN=$(curl --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"gitlab\" }" https://vault.dylanw.net/v1/auth/gitlab-jwt/login | jq -r ".auth.client_token")'
 
