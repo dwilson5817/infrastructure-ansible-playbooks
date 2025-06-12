@@ -1,0 +1,22 @@
+---
+
+- name: "Create TXT record for {{ challenge.key }} on CloudFlare DNS to complete challenge"
+  community.general.cloudflare_dns:
+    zone: "{{ item.props.cloudflare_zone }}"
+    record: "{{ challenge.key }}"
+    type: TXT
+    value: "{{ challenge_value }}"
+    api_token: "{{ cloudflare_api_token }}"
+  loop: "{{ challenge.value }}"
+  loop_control:
+    loop_var: challenge_value
+
+- name: Wait for a TXT entry to appear
+  community.dns.wait_for_txt:
+    records:
+      - name: "{{ challenge.key }}"
+        values: "{{ challenge_value }}"
+        mode: subset
+  loop: "{{ challenge.value }}"
+  loop_control:
+    loop_var: challenge_value

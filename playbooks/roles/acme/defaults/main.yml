@@ -1,0 +1,11 @@
+---
+
+acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
+
+acme_dir_base: '/etc/letsencrypt'
+
+acme_dir_names:
+  account_dir: account
+  certs_dir: certs
+  csrs_dir: csrs
+  keys_dir: keys

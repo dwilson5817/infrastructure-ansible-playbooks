@@ -1,5 +1,14 @@
 ---
 
+vault_acme: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/acme', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
 vault_ansible: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/ansible', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+vault_cloudflare: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/cloudflare', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
 
 ansible_ssh_user: "{{ vault_ansible['ssh_user'] }}"
+
+domain: dylanw.net
+
+acme_contact: "{{ vault_acme['contact_email'] }}"
+acme_directory: https://acme-v02.api.letsencrypt.org/directory
+
+cloudflare_api_token: "{{ vault_cloudflare['api_token'] }}"
