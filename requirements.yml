@@ -1,0 +1,39 @@
+# Ansible includes some collection in the full installation!  Use versioning to prevent differences in collection
+# versions on development environment and GitLab CI!
+
+collections:
+  - name: ansible.posix
+    version: 1.6.2
+  - name: community.general
+    version: 10.7.0
+  - name: community.crypto
+    version: 2.26.1
+  - name: community.dns
+    version: 3.2.4
+  - name: community.docker
+    version: 4.6.0
+  - name: community.mysql
+    version: 3.13.0
+  - name: grafana.grafana
+    version: 5.7.0
+  - name: prometheus.prometheus
+    version: 0.26.2
+
+roles:
+  - name: geerlingguy.composer
+    version: 1.9.2
+  - name: geerlingguy.docker
+    version: 7.4.7
+  - name: geerlingguy.redis
+    version: 1.9.0
+  - name: geerlingguy.php
+    version: 6.0.0
+  - name: geerlingguy.php-versions
+    version: 7.0.0
+  - name: mailcow.mailcow
+    # The role is versionless and will always install from the master branch.
+    version: master
+  - name: nginxinc.nginx
+    version: 0.25.0
+  - name: nginxinc.nginx_config
+    version: 0.7.1

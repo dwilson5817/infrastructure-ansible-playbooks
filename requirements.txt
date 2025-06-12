@@ -1,0 +1,23 @@
+ansible==11.6.0
+
+## community.general.proxmox plugin
+# requests: Needed to make network requests to Proxmox
+# proxmoxer: Proxmox client for Python
+requests==2.32.4
+proxmoxer==2.2.0
+
+## community.hashi_vault
+# hvac: Python client for HashiCorp Vault
+hvac==2.3.0
+
+## prometheus.prometheus
+# passlib: Needed for hashing passwords
+passlib[bcrypt]==1.7.4
+
+## grafana.grafana
+# jmespath: Needed for json_query filter
+jmespath==1.0.1
+
+## runner
+# toml: Needed for the to_toml/from_toml filter
+toml==0.10.2
