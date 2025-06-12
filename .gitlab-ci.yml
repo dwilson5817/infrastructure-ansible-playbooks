@@ -18,9 +18,6 @@ execute-ansible:
     # Ask Vault to sign our certificate
     - 'curl --header "X-Vault-Token: $VAULT_TOKEN" --request POST --data "{ \"public_key\": \"$(cat $HOME/.ssh/id_rsa.pub)\" }" "$VAULT_ADDR/v1/infrastructure/ansible-playbooks/ssh-clients/sign/ansible" | jq -r ".data.signed_key" > $HOME/.ssh/id_rsa-cert.pub'
 
-    # Temporary debugging
-    - cat $HOME/.ssh/id_rsa-cert.pub
-
     # Install Python requirements (including Ansible)
     - pip install -r requirements.txt
 
