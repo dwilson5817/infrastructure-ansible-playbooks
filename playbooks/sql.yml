@@ -1,0 +1,64 @@
+---
+
+- hosts: sql
+  roles:
+    - role: dns
+    - role: repos
+      become: yes
+      vars:
+        repo_keys:
+        - name: mariadb.pgp
+          src: https://mariadb.org/mariadb_release_signing_key.pgp
+        repo_sources:
+        - "deb [signed-by=/etc/apt/keyrings/mariadb.pgp] https://deb.mariadb.org/10.11/debian {{ ansible_distribution_release }} main"
+        repo_packages:
+        - mariadb-common
+        - mariadb-server
+        - mariadb-client
+        - mariadb-backup
+        - libmariadb3
+    - role: mariadb
+      become: yes
+    - role: prometheus.prometheus.mysqld_exporter
+      vars:
+        mysqld_exporter_username: export
+        mysqld_exporter_password: "{{ mariadb_passwords.export }}"
+        mysqld_exporter_web_listen_address: "0.0.0.0:9102"
+        mysqld_exporter_tls_server_config:
+          cert_file: "/etc/letsencrypt/certs/{{ ansible_host }}/fullchain.pem"
+          key_file: "/etc/letsencrypt/keys/{{ ansible_host }}.pem"
+  post_tasks:
+    - name: Create database user with name 'bob' and password '12345' with all database privileges
+      community.mysql.mysql_user:
+        name: export
+        host: localhost
+        password: "{{ mariadb_passwords.export }}"
+        priv: '*.*:PROCESS,REPLICATION CLIENT,SELECT'
+        state: present
+      become: true
+    - name: Create the node_exporter user
+      become: yes
+      ansible.builtin.user:
+        name: mysqld-exp
+        groups: certs
+        append: true
+      register: add_mysqld_exporter_to_certs_group
+    - name: Ensure MySQLd Exporter is restarted
+      become: yes
+      ansible.builtin.systemd:
+        name: mysqld_exporter
+        state: restarted
+      when: add_mysqld_exporter_to_certs_group.changed
+    - name: Add the user 'james' with a bash shell, appending the group 'admins' and 'developers' to the user's groups
+      ansible.builtin.user:
+        name: sqladm
+        password: "{{ mariadb_passwords.sqladm }}"
+      become: yes
+    - name: Create database user with name 'bob' and password '12345' with all database privileges
+      community.mysql.mysql_user:
+        name: sqladm
+        host: desktop01.london.dylanw.net
+        password: "{{ mariadb_passwords.sqladm }}"
+        priv: '*.*:ALL'
+        state: present
+      become: yes

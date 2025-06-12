@@ -1,0 +1,33 @@
+---
+
+vault_mariadb_passwords: "{{ lookup('community.hashi_vault.vault_kv2_get', 'sql/mariadb/passwords', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+
+dns_records:
+  - zone: dylanw.net
+    record: sql.dylanw.net
+    type: CNAME
+    value: "{{ ansible_host }}"
+
+mariadb_passwords: "{{ vault_mariadb_passwords }}"
+
+mariadb_users:
+- name: antrim
+  host: web01.london.dylanw.net
+- name: miners
+  host: web01.london.dylanw.net
+- name: miners
+  host: game01.london.dylanw.net
+- name: miners
+  host: game02.london.dylanw.net
+
+mariadb_dbs:
+- antrim_website
+- dylanw_free-market-fandango-prod
+- dylanw_halloween-voting-system-prod
+- dylanw_initiative-tracker-prod
+- dylanw_muckamore-credit-union-website-prod
+- dylanw_utility-website-prod
+- miners_panel
+- miners_server
+- miners_website
+- muckam_website

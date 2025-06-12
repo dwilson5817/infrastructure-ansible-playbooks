@@ -1,0 +1,32 @@
+- name: Install common packages
+  ansible.builtin.package:
+    name:
+      - software-properties-common
+      - ca-certificates
+      - lsb-release
+      - apt-transport-https
+    state: present
+
+- name: Create /etc/apt/keyrings if it does not exist
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: "Download {{ item.key }}"
+  ansible.builtin.get_url:
+    url: "{{ item.src }}"
+    dest: "/etc/apt/keyrings/{{ item.name }}"
+  loop: "{{ repo_keys }}"
+
+- name: "Add repo {{ item }}"
+  ansible.builtin.apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop: "{{ repo_sources }}"
+
+- name: Install a list of packages
+  ansible.builtin.package:
+    name: "{{ repo_packages }}"
+    state: present
