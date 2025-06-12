@@ -1,0 +1,20 @@
+plugin: community.general.proxmox
+
+url: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret']['url'] }}"
+user: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret']['user'] }}"
+password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret']['password'] }}"
+
+validate_certs: false
+
+filters:
+  - "proxmox_vmtype == 'qemu'"
+  - "proxmox_tags_parsed is defined and 'ansible' in proxmox_tags_parsed"
+
+keyed_groups:
+  - key: proxmox_tags_parsed
+    separator: ""
+
+compose:
+  ansible_host: "[ proxmox_name, proxmox_node, 'dylanw.net' ] | join('.') if proxmox_name is defined else 'london.dylanw.net'"
+
+want_facts: yes
