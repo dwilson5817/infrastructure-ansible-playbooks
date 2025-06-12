@@ -23,3 +23,6 @@ execute-ansible:
 
     # Install Ansible roles and collections
     - ansible-galaxy install -r requirements.yml
+
+    # Finally, run Ansible playbook
+    - ansible-playbook -i london.proxmox.yml playbooks/main.yml
