@@ -1,0 +1,46 @@
+---
+
+- hosts: proxmox_all_running
+  gather_facts: no
+  tasks:
+  - name: Verifying all hosts are reachable, waiting up to 1 minute for new VMs to come online
+    ansible.builtin.wait_for_connection:
+      timeout: 60
+  - name: Gathering facts for all machines
+    ansible.builtin.setup:
+
+- hosts: proxmox_all_running
+  become: yes
+  roles:
+  - role: updates
+    become: true
+  - role: acme
+    vars:
+      acme_certs:
+        "{{ ansible_host }}":
+          cloudflare_zone: dylanw.net
+  - role: prometheus.prometheus.node_exporter
+    vars:
+      node_exporter_web_listen_address: "0.0.0.0:9101"
+      node_exporter_tls_server_config:
+        cert_file: "/etc/letsencrypt/certs/{{ ansible_host }}/fullchain.pem"
+        key_file: "/etc/letsencrypt/keys/{{ ansible_host }}.pem"
+  post_tasks:
+  - name: Create the node_exporter user
+    ansible.builtin.user:
+      name: "node-exp"
+      groups: certs
+      append: true
+    register: add_node_exporter_to_certs_group
+  - name: Ensure Node Exporter is enabled on boot
+    become: true
+    ansible.builtin.systemd:
+      name: node_exporter
+      state: restarted
+    when: add_node_exporter_to_certs_group.changed
+  handlers:
+  - name: Restart node_exporter after certificates changed
+    ansible.builtin.service:
+      name: node_exporter
+      state: restarted
+    listen: acme_certs_changed

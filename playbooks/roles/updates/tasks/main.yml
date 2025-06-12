@@ -1,0 +1,7 @@
+---
+
+- name: Update APT package cache (if older than 1 hour)
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Perform full system upgrade using APT
+  apt: upgrade=dist force_apt_get=yes
