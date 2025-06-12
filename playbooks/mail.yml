@@ -1,0 +1,14 @@
+---
+
+- hosts: mail
+  roles:
+  - role: dns
+  - role: geerlingguy.docker
+    become: yes
+    vars:
+      docker_install_compose_plugin: false
+      docker_install_compose: true
+  - role: mailcow.mailcow
+    become: yes
+    vars:
+      mailcow__hostname: "{{ mail_hostname }}"

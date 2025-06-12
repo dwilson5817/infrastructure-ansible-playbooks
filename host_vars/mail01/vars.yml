@@ -1,0 +1,8 @@
+---
+
+mail_dns_zone: dylanw.net
+mail_hostname: mail.dylanw.net
+
+dns_records:
+  - zone: "{{ mail_dns_zone }}"
+    record: "{{ mail_hostname }}"

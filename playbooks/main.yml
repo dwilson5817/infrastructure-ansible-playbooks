@@ -5,7 +5,7 @@
 - import_playbook: monitor.yml
 #- import_playbook: web.yml
 - import_playbook: sql.yml
-#- import_playbook: mail.yml
+- import_playbook: mail.yml
 #- import_playbook: git.yml
 #- import_playbook: runner.yml
 #- import_playbook: game.yml
