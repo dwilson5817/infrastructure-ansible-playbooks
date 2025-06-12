@@ -11,8 +11,8 @@
   ansible.builtin.set_fact:
     cloudflare_plugin_data: |
       CF_Token={{ cloudflare_api_token }}
-      CF_Account_ID=0c9361536c3e8ff6fd396a803e1ab37b
-      CF_Zone_ID=11b64a186a334773037bb2f77cf145f7
+      CF_Account_ID={{ cloudflare_account_id }}
+      CF_Zone_ID={{ cloudflare_zone_id }}
 
 - name: Fetch existing ACME plugins configuration
   ansible.builtin.command: pvesh get /cluster/acme/plugins --output-format json-pretty
