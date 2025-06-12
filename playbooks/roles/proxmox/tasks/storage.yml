@@ -1,0 +1,4 @@
+---
+
+- name: Configure Proxmox local storage allowed content types
+  ansible.builtin.command: pvesh set /storage/local --content vztmpl,images,iso,backup,snippets

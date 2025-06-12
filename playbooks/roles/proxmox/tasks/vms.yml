@@ -1,0 +1,157 @@
+---
+
+- name: Generate and write cloud-init user configuration
+  ansible.builtin.copy:
+    content: |
+      #cloud-config
+      
+      {{ cloud_init_config | to_nice_yaml }}
+
+    dest: "/var/lib/vz/snippets/{{ item.props.id }}-cloud-init-user.yml"
+  vars:
+    cloud_init_config:
+      hostname: "{{ item.name }}"
+      manage_etc_hosts: true
+      fqdn: "{{ item.name }}.{{ item.props.host }}.{{ domain }}"
+      user: ansible
+      ssh_authorized_keys:
+        - "{{ proxmox_ssh_keys }}"
+      chpasswd:
+        expire: false
+      users:
+        - default
+      package_upgrade: true
+      write_files:
+        - path: /etc/ssh/sshd_config.d/00-cloud-init.conf
+          content: |
+            # This file is managed by cloud-init!
+            # Don't edit manually
+            
+            TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys.pem
+
+        - path: /etc/ssh/trusted-user-ca-keys.pem
+          content: |
+            {{ lookup('ansible.builtin.url', 'https://vault.dylanw.net/v1/infrastructure-ssh-client-signer/public_key') }}
+
+- name: Generate and write cloud-init network configuration
+  ansible.builtin.copy:
+    content: |
+      #cloud-config
+
+      {{ cloud_init_config | to_nice_yaml }}
+
+    dest: "/var/lib/vz/snippets/{{ item.props.id }}-cloud-init-network.yml"
+  vars:
+    cloud_init_config:
+      network:
+        version: 2
+        ethernets:
+          eth0:
+            match:
+              macaddress: "{{ item.props.mac_address }}"
+            dhcp4: no
+            dhcp6: no
+            addresses: "{{ (item.props.ipv4.addresses + item.props.ipv6.addresses) | map(attribute='ip') | zip( (item.props.ipv4.addresses + item.props.ipv6.addresses) | map(attribute='mask') ) | map('join', '/') | list }}"
+            nameservers:
+              addresses: "{{ proxmox_vm_dns_servers }}"
+              search: "{{ proxmox_vm_search_domains }}"
+            routes:
+            - to: 0.0.0.0/0
+              via: "{{ item.props.ipv4.gateway }}"
+              on-link: yes
+            - to: '::/0'
+              via: "{{ item.props.ipv6.gateway }}"
+              on-link: true
+
+- name: Provision new Proxmox VM with cloud-init configuration
+  community.general.proxmox_kvm:
+    node: "{{ proxmox_host }}"
+    api_user: "{{ proxmox_token_user }}"
+    api_token_id: "{{ proxmox_token_id }}"
+    api_token_secret: "{{ proxmox_token_secret }}"
+    api_host: "{{ item.props.host }}"
+    name: "{{ item.name }}"
+    vmid: "{{ item.props.id }}"
+    cores: "{{ item.props.size.cores }}"
+    memory: "{{ item.props.size.memory }}"
+    scsi:
+      scsi0: "local:0,import-from=local:0/debian-12-generic-amd64-{{ template_version }}.qcow2,format=qcow2"
+    ide:
+      ide2: 'local:cloudinit,format=qcow2'
+    serial: '{"serial0":"socket"}'
+    cicustom: "user=local:snippets/{{ item.props.id }}-cloud-init-user.yml,network=local:snippets/{{ item.props.id }}-cloud-init-network.yml"
+    ostype: l26
+    description: |
+      {{ item.name }} is an Ansible-managed server!
+
+      Hostname: **{{ item.name }}.{{ item.props.host }}.{{ domain }}**.
+
+      Created: **{{ '%b %d %Y %H:%M:%S' | strftime(ansible_date_time.epoch) }}**.
+
+      IP address: **{{ item.props.ipv4.addresses[0].ip }}**.
+
+      CPU: **{{ item.props.size.cores }} core(s)**.
+
+      Memory: **{{ item.props.size.memory }} GB**.
+
+      Disk: **{{ item.props.size.disk_size }} GB**.
+
+      **Please don't modify the settings by hand!**
+    tags: "{{ [ 'ansible' ] + item.props.tags }}"
+
+- name: Resize VM disk to specified size
+  community.general.proxmox_disk:
+    api_host: "{{ item.props.host }}"
+    api_user: "{{ proxmox_token_user }}"
+    api_token_id: "{{ proxmox_token_id }}"
+    api_token_secret: "{{ proxmox_token_secret }}"
+    vmid: "{{ item.props.id }}"
+    disk: scsi0
+    size: "{{ item.props.size.disk_size }}G"
+    state: resized
+
+- name: Configure VM network interface with specified MAC address
+  community.general.proxmox_nic:
+    api_host: "{{ item.props.host }}"
+    api_user: "{{ proxmox_token_user }}"
+    api_token_id: "{{ proxmox_token_id }}"
+    api_token_secret: "{{ proxmox_token_secret }}"
+    vmid: "{{ item.props.id }}"
+    interface: net0
+    bridge: "{{ item.props.bridge }}"
+    mac: "{{ item.props.mac_address }}"
+    firewall: true
+
+- name: Create DNS A record for IPv4 address
+  community.general.cloudflare_dns:
+    zone: dylanw.net
+    record: "{{ item.name }}.{{ ansible_host }}"
+    type: A
+    value: "{{ item.props.ipv4.addresses[0].ip }}"
+    solo: yes
+    comment: Managed by Ansible
+    api_token: "{{ cloudflare_api_token }}"
+
+- name: Create DNS AAAA record for IPv6 address
+  community.general.cloudflare_dns:
+    zone: dylanw.net
+    record: "{{ item.name }}.{{ ansible_host }}"
+    type: AAAA
+    value: "{{ item.props.ipv6.addresses[0].ip }}"
+    solo: yes
+    comment: Managed by Ansible
+    api_token: "{{ cloudflare_api_token }}"
+
+- name: Start VM and verify successful boot
+  community.general.proxmox_kvm:
+    node: "{{ proxmox_host }}"
+    api_user: "{{ proxmox_token_user }}"
+    api_token_id: "{{ proxmox_token_id }}"
+    api_token_secret: "{{ proxmox_token_secret }}"
+    api_host: "{{ item.props.host }}"
+    vmid: "{{ item.props.id }}"
+    state: started
+  retries: 3
+  delay: 3
+  register: result
+  until: not result.failed

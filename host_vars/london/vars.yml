@@ -1,0 +1,218 @@
+---
+
+vault_proxmox: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+
+# Secrets from Vault
+ansible_ssh_user: "{{ vault_proxmox['ssh_user'] }}"
+ansible_ssh_pass: "{{ vault_proxmox['ssh_password'] }}"
+
+proxmox_host: london
+
+template_version: 20250530-2128
+template_checksum: 00fc1e3c46ae8b418aaa67cab9efcf72b3826847881bac04cc06ab0eeb3f513d58c45c1f2896e71591cc297052a7bc864d35c2808948c49ed2836abba50e1f3a
+debian_version: 12
+
+vm_sizes:
+  small:
+    cores: 1
+    memory: 2048
+    disk_size: 50
+  medium:
+    cores: 2
+    memory: 4096
+    disk_size: 100
+  large:
+    cores: 4
+    memory: 8192
+    disk_size: 150
+  extra_large:
+    cores: 8
+    memory: 16384
+    disk_size: 200
+
+proxmox_vms:
+  monitor01:
+    id: 101
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.small }}"
+    mac_address: 02:00:00:2b:d3:22
+    bridge: vmbr0
+    ipv4:
+      addresses:
+      - ip: 51.38.73.128
+        mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:33fd:5021:4919:a13b
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    gw:
+    tags:
+      - monitor
+  web01:
+    id: 102
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.medium }}"
+    mac_address: 02:00:00:f6:a8:5d
+    bridge: vmbr0
+    ipv4:
+      addresses:
+        - ip: 51.38.73.129
+          mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:9fc5:f2ab:995f:f6e7
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - web
+  sql01:
+    id: 103
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.medium }}"
+    mac_address: 02:00:00:99:18:da
+    bridge: vmbr0
+    ipv4:
+      addresses:
+      - ip: 51.38.73.130
+        mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:3623:f91e:94b1:b8fe
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - sql
+  mail01:
+    id: 104
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.medium }}"
+    mac_address: 02:00:00:33:d5:42
+    bridge: vmbr0
+    ipv4:
+      addresses:
+      - ip: 51.38.73.131
+        mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:5cb0:ea3b:c70c:630f
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - mail
+  git01:
+    id: 105
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.large }}"
+    mac_address: 02:00:00:93:e9:63
+    bridge: vmbr0
+    ipv4:
+      addresses:
+      - ip: 51.38.73.132
+        mask: 32
+      - ip: 51.38.73.143
+        mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:bf01:36f9:3b98:e390
+        mask: 128
+      - ip: 2001:41d0:800:3f6d:d23b:35f2:84ea:9e58
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - git
+  game01:
+    id: 107
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.extra_large }}"
+    mac_address: 02:00:00:93:fa:22
+    bridge: vmbr0
+    ipv4:
+      addresses:
+      - ip: 51.38.73.133
+        mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:5e26:59fe:cb6d:2fa3
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - game
+  game02:
+    id: 108
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.extra_large }}"
+    mac_address: 02:00:00:b1:3f:a8
+    bridge: vmbr0
+    ipv4:
+      addresses:
+      - ip: 51.38.73.134
+        mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:6bfc:67df:abd0:474d
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - game
+  runner01:
+    id: 109
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.small }}"
+    mac_address: 02:00:00:6e:52:6d
+    bridge: vmbr0
+    ipv4:
+      addresses:
+      - ip: 51.38.73.135
+        mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:5839:114d:3b28:c1db
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - runner
+  runner02:
+    id: 110
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.small }}"
+    mac_address: 02:00:00:bf:c9:a2
+    bridge: vmbr0
+    ipv4:
+      addresses:
+      - ip: 51.38.73.136
+        mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:fb3f:bc1d:0ed5:c7fc
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - runner
+  desktop01:
+    id: 111
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.large }}"
+    mac_address: 02:00:00:ae:c9:b9
+    bridge: vmbr0
+    ipv4:
+      addresses:
+      - ip: 51.38.73.137
+        mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+      - ip: 2001:41d0:800:3f6d:c388:c947:0132:0281
+        mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - desktop

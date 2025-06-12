@@ -1,6 +1,6 @@
 ---
 
-#- import_playbook: proxmox.yml
+- import_playbook: proxmox.yml
 #- import_playbook: general.yml
 #- import_playbook: monitor.yml
 #- import_playbook: web.yml

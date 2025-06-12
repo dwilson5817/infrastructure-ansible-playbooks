@@ -1,0 +1,11 @@
+---
+
+proxmox_token_user: root@pam
+proxmox_token_id: ansible
+
+proxmox_vm_search_domains:
+  - "{{ ansible_host }}"
+
+proxmox_vm_dns_servers:
+  - '1.1.1.1'
+  - '8.8.8.8'

@@ -1,0 +1,31 @@
+- name: Retrieve ACME Terms of Service URL from Proxmox
+  ansible.builtin.command: pvesh get /cluster/acme/tos
+  register: acme_tos_url
+
+- name: Create default ACME account with terms acceptance
+  ansible.builtin.command:
+    cmd: pvesh create /cluster/acme/account --contact {{ acme_contact | quote }} --tos_url {{ acme_tos_url.stdout | quote }}
+    creates: /etc/pve/priv/acme/default
+
+- name: Configure CloudFlare DNS authentication credentials
+  ansible.builtin.set_fact:
+    cloudflare_plugin_data: |
+      CF_Token={{ cloudflare_api_token }}
+      CF_Account_ID=0c9361536c3e8ff6fd396a803e1ab37b
+      CF_Zone_ID=11b64a186a334773037bb2f77cf145f7
+
+- name: Fetch existing ACME plugins configuration
+  ansible.builtin.command: pvesh get /cluster/acme/plugins --output-format json-pretty
+  register: proxmox_acme_plugins
+
+- name: Configure CloudFlare DNS ACME plugin if not present
+  ansible.builtin.command: pvesh create /cluster/acme/plugins --id cloudflare_plugin --type dns --api cf --data {{ cloudflare_plugin_data | b64encode }}
+  when: "'cloudflare_plugin' not in proxmox_acme_plugins.stdout | from_json | map(attribute='plugin') | list"
+
+- name: Configure node to use CloudFlare DNS for ACME validation
+  ansible.builtin.command: pvesh set /nodes/london/config --acmedomain0 domain={{ ansible_host | quote }},plugin=cloudflare_plugin
+
+- name: Request and install TLS certificate using ACME
+  ansible.builtin.command:
+    cmd: pvesh create /nodes/london/certificates/acme/certificate
+    creates: /etc/pve/local/pveproxy-ssl.pem

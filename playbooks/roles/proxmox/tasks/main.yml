@@ -1,0 +1,113 @@
+---
+
+- name: Setup APT package repositories
+  include_tasks: apt.yml
+
+- name: Setup DNS resolvers and search domain
+  include_tasks: dns.yml
+
+- name: Configure ACME SSL certificates
+  include_tasks: acme.yml
+
+- name: Configure storage volumes and directories
+  include_tasks: storage.yml
+
+- name: Install and configure NGINX
+  ansible.builtin.import_role:
+    name: nginxinc.nginx
+  vars:
+    nginx_install_from: os_repository
+    nginx_service_modify: true
+    nginx_service_clean: false
+    nginx_service_custom: true
+    nginx_service_custom_file: nginx.override.conf
+
+- name: Remove NGINX default virtual host
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Configure NGINX reverse proxy
+  ansible.builtin.import_role:
+    name: nginxinc.nginx_config
+  vars:
+    nginx_config_http_template_enable: true
+    nginx_config_http_template:
+      - deployment_location: /etc/nginx/sites-enabled/proxmox.conf
+        backup: false
+        config:
+          upstreams:
+            - name: proxmox
+              servers:
+                - address: london.dylanw.net
+          servers:
+            - core:
+                listen:
+                  - port: 80
+                    default_server: true
+              rewrite:
+                rewrites:
+                  - regex: ^(.*)
+                    replacement: https://$host$1
+                    flag: permanent
+            - core:
+                listen:
+                  - port: 443
+                    ssl: true
+                server_name: _
+              ssl:
+                certificate: "/etc/pve/local/pveproxy-ssl.pem"
+                certificate_key: "/etc/pve/local/pveproxy-ssl.key"
+              proxy:
+                redirect: false
+              locations:
+                - location: /
+                  core:
+                    client_max_body_size: 0
+                    send_timeout: 3600s
+                  proxy:
+                    set_header:
+                      - field: Upgrade
+                        value: $http_upgrade
+                      - field: Connection
+                        value: upgrade
+                    pass: https://localhost:8006
+                    buffering: false
+                    connect_timeout: 3600s
+                    read_timeout: 3600s
+                    send_timeout: 3600s
+
+- name: Apply NGINX configuration changes
+  ansible.builtin.systemd:
+    name: nginx.service
+    state: reloaded
+
+- name: Create VM images directory
+  ansible.builtin.file:
+    path: /var/lib/vz/images/0
+    state: directory
+
+- name: Configure local storage content types
+  ansible.builtin.command: pvesh set /storage/local --content images,iso,vztmpl,backup
+
+- name: Download Debian cloud image
+  ansible.builtin.get_url:
+    url: "https://cloud.debian.org/images/cloud/bookworm/{{ template_version }}/debian-12-generic-amd64-{{ template_version }}.qcow2"
+    dest: "/var/lib/vz/images/0/debian-12-generic-amd64-{{ template_version }}.qcow2"
+    checksum: "sha512:{{ template_checksum }}"
+
+- name: Setup VMs with temporary API token
+  block:
+  - name: Generate temporary Proxmox API token
+    ansible.builtin.command: "pvesh create /access/users/{{ proxmox_token_user }}/token/{{ proxmox_token_id }} --privsep false --output-format json-pretty"
+    register: proxmox_api_token_result
+
+  - name: Store API token value
+    ansible.builtin.set_fact:
+      proxmox_token_secret: "{{ (proxmox_api_token_result.stdout | from_json).value }}"
+
+  - name: Create and configure virtual machines
+    include_tasks: vms.yml
+    loop: "{{ proxmox_vms | dict2items(key_name='name', value_name='props') }}"
+    vars:
+      proxmox_ssh_keys: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyJ88mt6hyT+Lxk9HD2B2hIyz8orzJJsoTAXNVQuYxTeQYZwJ2wnsK9+k4eD6/Q3/7f1cE6pG4cF/x8P5/xnw5KlCP+ENf4VfnjPOOF7gafJxsB5ECmZuhyWgjbKFt6J+ANTvEVVDWjgV4K5+s0KyZujK9gV2B4WW31ThqS7EIByH3lAu/o+nQd3Sptra5LlCs01/YxcWdPltmvGuyW5a770bAc/F83qjgNmdLGCAx8Dxx9jLLUjW6LxWWql

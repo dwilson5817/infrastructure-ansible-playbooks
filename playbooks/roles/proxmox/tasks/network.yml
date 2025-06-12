@@ -1,0 +1,48 @@
+---
+
+- name: Get current network bridge configuration
+  ansible.builtin.command: pvesh get /nodes/london/network --type bridge --output-format json-pretty
+  register: networks_result
+
+- name: Extract network interface names
+  ansible.builtin.set_fact:
+    proxmox_networks: "{{ (networks_result.stdout | from_json) | map(attribute='iface') }}"
+
+- name: Create network bridge vmbr1
+  ansible.builtin.command: pvesh create /nodes/london/network --iface vmbr1 --type bridge --autostart true --address 10.0.0.1 --netmask 255.255.255.0
+  when: "'vmbr1' not in proxmox_networks"
+
+- name: Apply initial bridge configuration
+  ansible.builtin.command: pvesh set /nodes/london/network
+  when: "'vmbr1' not in proxmox_networks"
+
+- name: Enable IP forwarding for vmbr1
+  community.general.interfaces_file:
+    iface: vmbr1
+    option: post-up
+    value: 'echo 1 > /proc/sys/net/ipv4/ip_forward'
+    backup: true
+    state: present
+  register: vmbr1_post_up_ip_forward
+
+- name: Configure NAT masquerade on bridge startup
+  community.general.interfaces_file:
+    iface: vmbr1
+    option: post-up
+    value: iptables -t nat -A POSTROUTING -s '10.0.0.0/24' -o vmbr0 -j MASQUERADE
+    backup: true
+    state: present
+  register: vmbr1_post_up_ip_tables
+
+- name: Remove NAT masquerade on bridge shutdown
+  community.general.interfaces_file:
+    iface: vmbr1
+    option: post-down
+    value: iptables -t nat -D POSTROUTING -s '10.0.0.0/24' -o vmbr0 -j MASQUERADE
+    backup: true
+    state: present
+  register: vmbr1_post_down_ip_tables
+
+- name: Apply network configuration changes
+  ansible.builtin.command: pvesh set /nodes/london/network
+  when: "vmbr1_post_up_ip_forward.changed or vmbr1_post_up_ip_tables.changed or vmbr1_post_down_ip_tables.changed"

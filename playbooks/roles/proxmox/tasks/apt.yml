@@ -1,0 +1,24 @@
+- name: Disable Proxmox Enterprise repository
+  ansible.builtin.apt_repository:
+    repo: deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
+    filename: pve-enterprise
+    update_cache: false
+    state: absent
+
+- name: Disable Ceph Enterprise repository
+  ansible.builtin.apt_repository:
+    repo: deb https://enterprise.proxmox.com/debian/ceph-quincy bookworm enterprise
+    filename: ceph
+    update_cache: false
+    state: absent
+
+- name: Enable Proxmox Community repository
+  ansible.builtin.apt_repository:
+    repo: deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+    filename: pve-no-subscription
+    state: present
+
+- name: Install Proxmox Python API client
+  ansible.builtin.package:
+    name: python3-proxmoxer
+    state: present

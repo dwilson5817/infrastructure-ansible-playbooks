@@ -1,0 +1,4 @@
+---
+
+- name: Configure node DNS resolvers and search domain
+  ansible.builtin.command: pvesh set /nodes/london/dns --search dylanw.net --dns1 1.1.1.1 --dns2 8.8.8.8
