@@ -2,7 +2,7 @@
 
 - import_playbook: proxmox.yml
 - import_playbook: general.yml
-#- import_playbook: monitor.yml
+- import_playbook: monitor.yml
 #- import_playbook: web.yml
 #- import_playbook: sql.yml
 #- import_playbook: mail.yml

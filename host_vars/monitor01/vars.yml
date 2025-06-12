@@ -1,0 +1,25 @@
+---
+
+vault_grafana: "{{ lookup('community.hashi_vault.vault_kv2_get', 'monitor/grafana', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+vault_prometheus_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'monitor/prometheus/users', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+
+prometheus_zone: "dylanw.net"
+prometheus_hostname: "prometheus.dylanw.net"
+
+grafana_zone: "dylanw.net"
+grafana_hostname: "monitoring.dylanw.net"
+
+prometheus_basic_auth_users: "{{ vault_prometheus_users }}"
+
+grafana_admin_username: dylan
+grafana_admin_password: "{{ vault_grafana['admin_password'] }}"
+
+dns_records:
+  - zone: "{{ prometheus_zone }}"
+    record: "{{ prometheus_hostname }}"
+    type: CNAME
+    value: "{{ ansible_host }}"
+  - zone: "{{ grafana_zone }}"
+    record: "{{ grafana_hostname }}"
+    type: CNAME
+    value: "{{ ansible_host }}"

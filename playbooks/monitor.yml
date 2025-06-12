@@ -1,0 +1,230 @@
+---
+
+- hosts: monitor
+  roles:
+  - role: dns
+  - role: prometheus.prometheus.prometheus
+    vars:
+      ansible_host_key_checking: false
+      prometheus_web_listen_address: "localhost:9090"
+      prometheus_web_external_url: "https://{{ prometheus_hostname }}"
+      prometheus_targets:
+        node:
+          - targets: "{{ groups['proxmox_all_qemu'] | map('extract', hostvars, 'ansible_host') | product([':9101']) | map('join') | list }}"
+        mysqld:
+          - targets: "{{ groups['sql'] | map('extract', hostvars, 'ansible_host') | product([':9102']) | map('join') | list }}"
+      prometheus_web_config:
+        tls_server_config: {}
+        http_server_config: {}
+        basic_auth_users: "{{ prometheus_basic_auth_users }}"
+      prometheus_scrape_configs:
+        - job_name: "prometheus"
+          metrics_path: "{{ prometheus_metrics_path }}"
+          scheme: https
+          basic_auth:
+            username: 'prometheus'
+            password: "{{ prometheus_basic_auth_users.prometheus }}"
+          static_configs:
+            - targets:
+                - "{{ prometheus_hostname }}"
+        - job_name: node
+          metrics_path: '/metrics'
+          scheme: https
+          basic_auth:
+            username: 'prometheus'
+            password: "{{ node_exporter_basic_auth_users.prometheus }}"
+          file_sd_configs:
+            - files:
+                - "{{ prometheus_config_dir }}/file_sd/node.yml"
+          relabel_configs:
+            - source_labels: [ __address__ ]
+              regex: "([^:]+):\\d+"
+              target_label: instance
+        - job_name: mysqld
+          metrics_path: '/metrics'
+          scheme: https
+          basic_auth:
+            username: 'prometheus'
+            password: "{{ mysqld_exporter_basic_auth_users.prometheus }}"
+          file_sd_configs:
+            - files:
+                - "{{ prometheus_config_dir }}/file_sd/mysqld.yml"
+          relabel_configs:
+            - source_labels: [ __address__ ]
+              regex: "([^:]+):\\d+"
+              target_label: instance
+  - role: grafana.grafana.grafana
+    vars:
+      grafana_ini:
+        instance_name: "{{ grafana_hostname }}"
+        root_url: "https://{{ grafana_hostname }}"
+        server:
+          http_addr: 127.0.0.1
+        security:
+          admin_user: "{{ grafana_admin_username }}"
+          admin_password: "{{ grafana_admin_password }}"
+      grafana_datasources:
+        - name: prometheus
+          type: prometheus
+          access: proxy
+          url: "https://{{ prometheus_hostname }}"
+          basicAuth: true
+          basicAuthUser: "grafana"
+          secureJsonData:
+            basicAuthPassword: "{{ prometheus_basic_auth_users.grafana }}"
+      grafana_dashboards:
+        - dashboard_id: 1860
+          revision_id: 31
+          datasource: prometheus
+          folder: 'Exporters'
+        - dashboard_id: 3662
+          revision_id: 2
+          datasource: prometheus
+          folder: 'Prometheus'
+        - dashboard_id: 7362
+          revision_id: 5
+          datasource: prometheus
+          folder: 'Exporters'
+  - role: nginxinc.nginx
+    become: yes
+  - role: acme
+    become: yes
+    vars:
+      acme_certs:
+        "{{ prometheus_hostname }}":
+          cloudflare_zone: "{{ prometheus_zone }}"
+        "{{ grafana_hostname }}":
+          cloudflare_zone: "{{ grafana_zone }}"
+  - role: nginxinc.nginx_config
+    become: yes
+    vars:
+      nginx_config_http_template_enable: true
+      nginx_config_http_template:
+        - deployment_location: /etc/nginx/conf.d/monitoring_dylanw_net.conf
+          backup: false
+          config:
+            map:
+              mappings:
+                - string: $http_upgrade
+                  variable: $connection_upgrade
+                  content:
+                    - value: default
+                      new_value: upgrade
+                    - value: "''"
+                      new_value: close
+            upstreams:
+              - name: grafana
+                servers:
+                  - address: localhost:3000
+            servers:
+              - core:
+                  listen:
+                    - port: 443
+                      ssl: true
+                    - port: 80
+                  server_name: "{{ grafana_hostname }}"
+                  root: /usr/share/nginx/html
+                  index: index.html index.htm
+                ssl:
+                  certificate: "/etc/letsencrypt/certs/{{ grafana_hostname }}/fullchain.pem"
+                  certificate_key: "/etc/letsencrypt/keys/{{ grafana_hostname }}.pem"
+                  session_cache:
+                    shared:
+                      name: le_nginx_SSL
+                      size: 10m
+                  session_timeout: 1440m
+                  session_tickets: false
+                  protocols:
+                    - TLSv1.2
+                    - TLSv1.3
+                  prefer_server_ciphers: false
+                  ciphers:
+                    - ECDHE-ECDSA-AES128-GCM-SHA256
+                    - ECDHE-RSA-AES128-GCM-SHA256
+                    - ECDHE-ECDSA-AES256-GCM-SHA384
+                    - ECDHE-RSA-AES256-GCM-SHA384
+                    - ECDHE-ECDSA-CHACHA20-POLY1305
+                    - ECDHE-RSA-CHACHA20-POLY1305
+                    - DHE-RSA-AES128-GCM-SHA256
+                    - DHE-RSA-AES256-GCM-SHA384
+                locations:
+                  - location: /
+                    proxy:
+                      set_header:
+                        - field: Host
+                          value: $http_host
+                      pass: http://grafana
+                  - location: /api/live/
+                    proxy:
+                      http_version: '1.1'
+                      set_header:
+                        - field: Upgrade
+                          value: $http_upgrade
+                        - field: Connection
+                          value: $connection_upgrade
+                        - field: Host
+                          value: $http_host
+                      pass: http://grafana
+                custom_directives:
+                  - >
+                    if ($scheme != "https") {
+                        return 301 https://$host$request_uri;
+                    }
+        - template_file: http/default.conf.j2
+          deployment_location: /etc/nginx/conf.d/prometheus_dylanw_net.conf
+          backup: false
+          config:
+            upstreams:
+              - name: prometheus
+                servers:
+                  - address: localhost:9090
+            servers:
+              - core:
+                  listen:
+                    - port: 443
+                      ssl: true
+                    - port: 80
+                  server_name: "{{ prometheus_hostname }}"
+                  root: /usr/share/nginx/html
+                  index: index.html index.htm
+                ssl:
+                  certificate: "/etc/letsencrypt/certs/{{ prometheus_hostname }}/fullchain.pem"
+                  certificate_key: "/etc/letsencrypt/keys/{{ prometheus_hostname }}.pem"
+                  session_cache:
+                    shared:
+                      name: le_nginx_SSL
+                      size: 10m
+                  session_timeout: 1440m
+                  session_tickets: false
+                  protocols:
+                    - TLSv1.2
+                    - TLSv1.3
+                  prefer_server_ciphers: false
+                  ciphers:
+                    - ECDHE-ECDSA-AES128-GCM-SHA256
+                    - ECDHE-RSA-AES128-GCM-SHA256
+                    - ECDHE-ECDSA-AES256-GCM-SHA384
+                    - ECDHE-RSA-AES256-GCM-SHA384
+                    - ECDHE-ECDSA-CHACHA20-POLY1305
+                    - ECDHE-RSA-CHACHA20-POLY1305
+                    - DHE-RSA-AES128-GCM-SHA256
+                    - DHE-RSA-AES256-GCM-SHA384
+                locations:
+                  - location: /
+                    proxy:
+                      set_header:
+                        - field: Host
+                          value: $http_host
+                      pass: http://prometheus
+                custom_directives:
+                  - >
+                    if ($scheme != "https") {
+                        return 301 https://$host$request_uri;
+                    }
+  handlers:
+    - name: Restart nginx after certificates changed
+      become: yes
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      listen: acme_certs_changed
