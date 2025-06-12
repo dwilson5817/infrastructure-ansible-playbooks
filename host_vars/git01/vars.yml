@@ -1,0 +1,63 @@
+vault_gitlab_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'git/gitlab/config', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+
+base_domain: dylanw.dev
+gitlab_domain: "gitlab.{{ base_domain }}"
+pages_domain: "pages.{{ base_domain }}"
+
+gitlab_ipv4: 51.38.73.132
+gitlab_ipv6: 2001:41d0:800:3f6d:bf01:36f9:3b98:e390
+pages_ipv4: 51.38.73.143
+pages_ipv6: 2001:41d0:800:3f6d:d23b:35f2:84ea:9e58
+
+dns_records:
+  - zone: "{{ base_domain }}"
+    record: "{{ gitlab_domain }}"
+    type: A
+    value: "{{ gitlab_ipv4 }}"
+  - zone: "{{ base_domain }}"
+    record: "{{ gitlab_domain }}"
+    type: AAAA
+    value: "{{ gitlab_ipv6 }}"
+  - zone: "{{ base_domain }}"
+    record: "{{ pages_domain }}"
+    type: A
+    value: "{{ pages_ipv4 }}"
+  - zone: "{{ base_domain }}"
+    record: "{{ pages_domain }}"
+    type: AAAA
+    value: "{{ pages_ipv6 }}"
+  - zone: "{{ base_domain }}"
+    record: "*.{{ pages_domain }}"
+    type: A
+    value: "{{ pages_ipv4 }}"
+  - zone: "{{ base_domain }}"
+    record: "*.{{ pages_domain }}"
+    type: AAAA
+    value: "{{ pages_ipv6 }}"
+
+gitlab_config:
+  external_url: "https://{{ gitlab_domain }}"
+  smtp:
+    enable: "{{ vault_gitlab_config['smtp_enable'] }}"
+    address: "{{ vault_gitlab_config['smtp_address'] }}"
+    port: "{{ vault_gitlab_config['smtp_port'] }}"
+    user_name: "{{ vault_gitlab_config['smtp_user_name'] }}"
+    password: "{{ vault_gitlab_config['smtp_password'] }}"
+    tls: "{{ vault_gitlab_config['smtp_tls'] }}"
+  email_from: "{{ vault_gitlab_config['email_from'] }}"
+  nginx:
+    listen_addresses:
+      - "{{ gitlab_ipv4 }}"
+      - "[{{ gitlab_ipv6 }}]"
+  pages:
+    external_url: "https://{{ pages_domain }}"
+    external_http:
+      - "{{ pages_ipv4 }}:80"
+      - "[{{ pages_ipv6 }}]:80"
+    external_https:
+      - "{{ pages_ipv4 }}:443"
+      - "[{{ pages_ipv6 }}]:443"
+    cert: "/etc/letsencrypt/certs/{{ pages_domain }}/fullchain.pem"
+    cert_key: "/etc/letsencrypt/keys/{{ pages_domain }}.pem"
+    redirect_http: "true"
+    nginx_enable: "false"

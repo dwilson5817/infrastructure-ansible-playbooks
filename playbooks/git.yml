@@ -1,0 +1,20 @@
+---
+
+- hosts: git
+  roles:
+    - role: dns
+    - role: acme
+      become: yes
+      vars:
+        acme_certs:
+          pages.dylanw.dev:
+            cloudflare_zone: dylanw.dev
+            alternative_domains:
+              - '*.pages.dylanw.dev'
+    - role: gitlab
+      become: yes
+  handlers:
+    - name: Reconfigure GitLab after certificates changed
+      become: yes
+      command: gitlab-ctl reconfigure
+      listen: acme_certs_changed

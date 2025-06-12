@@ -1,0 +1,30 @@
+---
+
+- name: Run script from GitLab to configure GitLab Runner repositories
+  ansible.builtin.shell: curl https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | bash
+  args:
+    creates: /etc/apt/sources.list.d/runner_gitlab-runner.list
+
+- name: Install GitLab Runner
+  ansible.builtin.package:
+    name:
+      - gitlab-runner
+    state: present
+
+- name: Read the GitLab Runner configuration file
+  ansible.builtin.slurp:
+    src: /etc/gitlab-runner/config.toml
+  register: runner_config_toml
+
+- name: Load GitLab Runner configuration from TOML format
+  ansible.builtin.set_fact:
+    runner_config: "{{ runner_config_toml.content | b64decode | from_toml }}"
+
+- name: Set list of existing GitLab runner tokens as fact
+  ansible.builtin.set_fact:
+    runner_config_tokens: "{{ runner_config.runners | default([]) | map(attribute='token') }}"
+
+- name: Register the GitLab Runner if the token isn't already registered
+  ansible.builtin.command:
+    cmd: "gitlab-runner register -n --url '{{ gitlab_url }}' --token '{{ gitlab_runner_token }}' --executor 'docker' --description '{{ ansible_hostname }}' --docker-image 'alpine:3.14' --docker-privileged --docker-volumes '/certs/client'"
+  when: gitlab_runner_token not in runner_config_tokens

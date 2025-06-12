@@ -9,6 +9,8 @@ ansible_ssh_user: "{{ vault_ansible['ssh_user'] }}"
 
 domain: dylanw.net
 
+gitlab_url: "https://gitlab.dylanw.dev"
+
 acme_contact: "{{ vault_acme['contact_email'] }}"
 acme_directory: https://acme-v02.api.letsencrypt.org/directory
 
