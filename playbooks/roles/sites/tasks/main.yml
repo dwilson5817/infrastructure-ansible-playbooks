@@ -1,0 +1,29 @@
+---
+
+- name: Create "docker" group
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Add the ansible user to the "docker" group
+  ansible.builtin.user:
+    name: ansible
+    groups: docker
+    append: yes
+  become: yes
+
+- name: Create directory for sites
+  ansible.builtin.file:
+    path: /srv/www
+    state: directory
+    owner: ansible
+    group: ansible
+  become: yes
+
+- name: Create directory for MinersRealm sites
+  ansible.builtin.file:
+    path: /srv/www/minersrealm.net
+    state: directory
+
+- name: Configure Pterodactyl
+  include_tasks: pterodactyl.yml

@@ -1,0 +1,59 @@
+---
+
+- name: Create directory for Pterodactyl
+  ansible.builtin.file:
+    path: /srv/www/minersrealm.net/panel
+    state: directory
+
+- name: Print return information from the previous task
+  ansible.builtin.debug:
+    var: vault_pterodactyl
+
+- name: Print return information from the previous task
+  ansible.builtin.debug:
+    var: pterodactyl
+
+- name: Deploy Pterodactyl Docker composition
+  ansible.builtin.template:
+    src: pterodactyl/docker-compose.yml.j2
+    dest: /srv/www/minersrealm.net/panel/docker-compose.yml
+
+- name: Bring Docker containers up
+  community.docker.docker_compose_v2:
+    project_src: /srv/www/minersrealm.net/panel
+
+- name: Bring down Pterodactyl
+  community.docker.docker_compose_v2_exec:
+    service: panel
+    command: php artisan down
+    project_src: /srv/www/minersrealm.net/panel
+
+- name: Clear view cache
+  community.docker.docker_compose_v2_exec:
+    service: panel
+    command: php artisan view:clear
+    project_src: /srv/www/minersrealm.net/panel
+
+- name: Clear configuration cache
+  community.docker.docker_compose_v2_exec:
+    service: panel
+    command: php artisan config:clear
+    project_src: /srv/www/minersrealm.net/panel
+
+- name: Run database migrations
+  community.docker.docker_compose_v2_exec:
+    service: panel
+    command: php artisan migrate --seed --force
+    project_src: /srv/www/minersrealm.net/panel
+
+- name: Restart the queue worker
+  community.docker.docker_compose_v2_exec:
+    service: panel
+    command: php artisan queue:restart
+    project_src: /srv/www/minersrealm.net/panel
+
+- name: Bring Pterodactyl up
+  community.docker.docker_compose_v2_exec:
+    service: panel
+    command: php artisan up
+    project_src: /srv/www/minersrealm.net/panel

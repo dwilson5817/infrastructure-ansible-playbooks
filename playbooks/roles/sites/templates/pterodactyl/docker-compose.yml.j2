@@ -1,0 +1,57 @@
+services:
+  cache:
+    image: redis:alpine
+    restart: always
+  panel:
+    image: ghcr.io/pterodactyl/panel:latest
+    restart: always
+    ports:
+      - "127.0.0.1:8100:80"
+    links:
+      - cache
+    environment:
+      APP_ENV: "{{ pterodactyl_env['app_env'] | default('production') }}"
+      APP_DEBUG: "{{ pterodactyl_env['app_debug'] | default('false') }}"
+      APP_KEY: "{{ pterodactyl_env['app_key'] | default('') }}"
+      APP_THEME: "{{ pterodactyl_env['app_theme'] | default('pterodactyl') }}"
+      APP_TIMEZONE: "{{ pterodactyl_env['app_timezone'] | default('UTC') }}"
+      APP_URL: "{{ pterodactyl_env['app_url'] | default('http://panel.example.com') }}"
+      APP_LOCALE: "{{ pterodactyl_env['app_locale'] | default('en') }}"
+      APP_ENVIRONMENT_ONLY: "{{ pterodactyl_env['app_environment_only'] | default('true') }}"
+
+      LOG_CHANNEL: "{{ pterodactyl_env['log_channel'] | default('daily') }}"
+      LOG_DEPRECATIONS_CHANNEL: "{{ pterodactyl_env['log_deprecations_channel'] | default('null') }}"
+      LOG_LEVEL: "{{ pterodactyl_env['log_level'] | default('debug') }}"
+
+      DB_CONNECTION: "{{ pterodactyl_env['db_connection'] | default('mysql') }}"
+      DB_HOST: "{{ pterodactyl_env['db_host'] | default('127.0.0.1') }}"
+      DB_PORT: "{{ pterodactyl_env['db_port'] | default('3306') }}"
+      DB_DATABASE: "{{ pterodactyl_env['db_database'] | default('panel') }}"
+      DB_USERNAME: "{{ pterodactyl_env['db_username'] | default('pterodactyl') }}"
+      DB_PASSWORD: "{{ pterodactyl_env['db_password'] | default('') }}"
+
+      REDIS_HOST: "{{ pterodactyl_env['redis_host'] | default('127.0.0.1') }}"
+      REDIS_PASSWORD: "{{ pterodactyl_env['redis_password'] | default('null') }}"
+      REDIS_PORT: "{{ pterodactyl_env['redis_port'] | default('6379') }}"
+
+      CACHE_DRIVER: "{{ pterodactyl_env['cache_driver'] | default('file') }}"
+      QUEUE_CONNECTION: "{{ pterodactyl_env['queue_connection'] | default('redis') }}"
+      SESSION_DRIVER: "{{ pterodactyl_env['session_driver'] | default('file') }}"
+
+      HASHIDS_SALT: "{{ pterodactyl_env['hashids_salt'] | default('') }}"
+      HASHIDS_LENGTH: "{{ pterodactyl_env['hashids_length'] | default('8') }}"
+
+      MAIL_MAILER: "{{ pterodactyl_env['mail_mailer'] | default('smtp') }}"
+      MAIL_HOST: "{{ pterodactyl_env['mail_host'] | default('smtp.example.com') }}"
+      MAIL_PORT: "{{ pterodactyl_env['mail_port'] | default('25') }}"
+      MAIL_USERNAME: "{{ pterodactyl_env['mail_username'] | default('') }}"
+      MAIL_PASSWORD: "{{ pterodactyl_env['mail_password'] | default('') }}"
+      MAIL_ENCRYPTION: "{{ pterodactyl_env['mail_encryption'] | default('tls') }}"
+      MAIL_FROM_ADDRESS: "{{ pterodactyl_env['mail_from_address'] | default('no-reply@example.com') }}"
+      MAIL_FROM_NAME: "{{ pterodactyl_env['mail_from_name'] | default('Pterodactyl Panel') }}"
+
+      APP_SERVICE_AUTHOR: "{{ pterodactyl_env['app_service_author'] | default('') }}"
+      PTERODACTYL_TELEMETRY_ENABLED: "{{ pterodactyl_env['pterodactyl_telemetry_enabled'] | default('') }}"
+      SESSION_SECURE_COOKIE: "{{ pterodactyl_env['session_secure_cookie'] | default('') }}"
+
+      MAIL_DRIVER: "{{ pterodactyl_env['mail_driver'] | default('') }}"
