@@ -1,0 +1,20 @@
+---
+
+vault_pterodactyl: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/pterodactyl', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+
+dns_records:
+  - zone: minersrealm.net
+    record: minersrealm.net
+  - zone: minersrealm.net
+    record: www.minersrealm.net
+  - zone: minersrealm.net
+    record: panel.minersrealm.net
+
+web_certs:
+  minersrealm.net:
+    cloudflare_zone: minersrealm.net
+    alternative_domains:
+    - panel.minersrealm.net
+    - www.minersrealm.net
+
+pterodactyl_env: "{{ vault_pterodactyl }}"
