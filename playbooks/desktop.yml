@@ -84,3 +84,25 @@
         groups: docker
         append: yes
       become: yes
+
+    - name: Download the AWS CLI bundle
+      ansible.builtin.get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/awscliv2.zip
+      register: aws_cli_download_bundle
+
+    - name: Unarchive the AWS CLI bundle
+      ansible.builtin.unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp
+        remote_src: yes
+        creates: /tmp/aws
+      when: aws_cli_download_bundle.changed
+      register: aws_cli_unarchive_installer
+
+    - name: Install or update the AWS CLI
+      ansible.builtin.command: ./aws/install --update
+      args:
+        chdir: /tmp
+        creates: /usr/local/bin/aws
+      become: yes
