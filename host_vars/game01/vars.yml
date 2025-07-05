@@ -1,0 +1,13 @@
+---
+
+dns_records:
+  - record: creative
+    zone: minersrealm.net
+  - record: hub
+    zone: minersrealm.net
+  - record: play
+    zone: minersrealm.net
+  - record: survival-games
+    zone: minersrealm.net
+  - record: survival
+    zone: minersrealm.net

@@ -2,6 +2,7 @@
 
 - hosts: game
   roles:
+    - role: dns
     - role: geerlingguy.docker
       become: yes
     - role: wings
