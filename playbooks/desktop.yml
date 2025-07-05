@@ -25,6 +25,8 @@
           - rsync
           - mariadb-client
           - vault
+          - zip
+          - unzip
 
           # For asdf Python
           - build-essential
