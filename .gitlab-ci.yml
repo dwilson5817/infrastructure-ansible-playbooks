@@ -14,7 +14,7 @@ execute-ansible:
     - apt update && apt install -y curl jq sshpass
 
     # Use GitLab JWT token to obtain a Vault token
-    - 'export VAULT_TOKEN=$(curl --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"gitlab\" }" https://vault.dylanw.net/v1/auth/gitlab-jwt/login | jq -r ".auth.client_token")'
+    - 'export VAULT_TOKEN=$(curl --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"gitlab\" }" "$VAULT_ADDR/v1/auth/gitlab-jwt/login" | jq -r ".auth.client_token")'
 
     # Ask Vault to sign our certificate
     - 'curl --header "X-Vault-Token: $VAULT_TOKEN" --request POST --data "{ \"public_key\": \"$(cat $HOME/.ssh/id_rsa.pub)\" }" "$VAULT_ADDR/v1/infrastructure/ansible-playbooks/ssh-clients/sign/ansible" | jq -r ".data.signed_key" > $HOME/.ssh/id_rsa-cert.pub'
