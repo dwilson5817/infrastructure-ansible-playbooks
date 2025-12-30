@@ -1,6 +1,14 @@
 ---
 
 - hosts: mail
+  pre_tasks:
+  - name: Install jq which is required by the mailcow update script
+    ansible.builtin.package:
+      name:
+      - jq
+      state: present
+      update_cache: yes
+    become: yes
   roles:
   - role: dns
   - role: geerlingguy.docker
