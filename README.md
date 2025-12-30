@@ -4,6 +4,38 @@
 
 A collection of Ansible configuration to manage VMs on my dedicated server.
 
+### Development
+
+To work with these playbooks locally, follow these steps:
+
+1. **Setup a Python virtual environment:**
+   ```bash
+   python3 -m venv .venv
+   source venv/bin/activate
+   ```
+
+2. **Install Python requirements:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Install Ansible Galaxy requirements:**
+   ```bash
+   ansible-galaxy install -r requirements.yml
+   ```
+
+4. **Configure environment variables:**
+   Set the following variables to authenticate with HashiCorp Vault:
+   ```bash
+   export VAULT_ADDR='your-vault-address'
+   export VAULT_TOKEN='your-vault-token'
+   ```
+
+5. **Run the Ansible playbooks:**
+   ```bash
+   ansible-playbook -i london.proxmox.yml playbooks/main.yml
+   ```
+
 ### Deployment
 
 The following machine types are managed within this repository. All nodes are initialized with a baseline configuration including system package management, user account provisioning, and SSH authorized key distribution.
