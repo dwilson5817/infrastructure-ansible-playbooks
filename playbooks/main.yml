@@ -10,3 +10,4 @@
 - import_playbook: runner.yml
 - import_playbook: game.yml
 - import_playbook: desktop.yml
+- import_playbook: social.yml

@@ -1,0 +1,7 @@
+---
+
+dns_records:
+  - record: bluesky
+    zone: dylanw.dev
+  - record: '*.bluesky'
+    zone: dylanw.dev

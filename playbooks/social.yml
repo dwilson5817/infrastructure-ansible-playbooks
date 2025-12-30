@@ -1,0 +1,7 @@
+---
+
+- hosts: social
+  roles:
+    - role: dns
+    - role: bluesky
+      become: yes

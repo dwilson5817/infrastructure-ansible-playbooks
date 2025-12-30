@@ -216,3 +216,21 @@ proxmox_vms:
       gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
     tags:
       - desktop
+  social01:
+    id: 112
+    host: "{{ proxmox_host }}"
+    size: "{{ vm_sizes.small }}"
+    mac_address: 02:00:00:c9:a2:31
+    bridge: vmbr0
+    ipv4:
+      addresses:
+        - ip: 51.38.73.138
+          mask: 32
+      gateway: 198.244.202.254
+    ipv6:
+      addresses:
+        - ip: 2001:41d0:800:3f6d:8473:f9b7:11df:ce10
+          mask: 128
+      gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
+    tags:
+      - social

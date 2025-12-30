@@ -1,0 +1,30 @@
+---
+
+- name: Run Bluesky PDS installer if not installed
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -fsSL https://raw.githubusercontent.com/bluesky-social/pds/main/installer.sh | bash -s -- "" "bluesky.dylanw.dev" "bluesky@dylanw.dev"
+  args:
+    executable: /bin/bash
+    creates: /pds/pds.env
+  register: pds_install
+  changed_when: pds_install.rc == 0 and (pds_install.stdout | length > 0 or pds_install.stderr | length > 0)
+  failed_when: pds_install.rc != 0
+  become: true
+
+- name: Show installer output (only when executed)
+  ansible.builtin.debug:
+    msg:
+      - "PDS installer STDOUT:"
+      - "{{ pds_install.stdout | default('') }}"
+      - "PDS installer STDERR:"
+      - "{{ pds_install.stderr | default('') }}"
+  when: pds_install is changed
+
+- name: Ensure a config block exists
+  ansible.builtin.blockinfile:
+    path: /pds/pds.env
+    marker: "# ANSIBLE MANAGED BLOCK #"
+    block: |
+      PDS_EMAIL_SMTP_URL=smtps://bluesky%40dylanw.dev:VmAdOhzWWYLxTJgZEJjH@mail.dylanw.net/
+      PDS_EMAIL_FROM_ADDRESS=bluesky@dylanw.dev
