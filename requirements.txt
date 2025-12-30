@@ -12,7 +12,9 @@ hvac==2.3.0
 
 ## prometheus.prometheus
 # passlib: Needed for hashing passwords
+# bcrypt: Pinned to 4.3.0 as 5.0.0 is not yet supported by passlib
 passlib[bcrypt]==1.7.4
+bcrypt==4.3.0
 
 ## grafana.grafana
 # jmespath: Needed for json_query filter
