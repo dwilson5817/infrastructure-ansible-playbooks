@@ -17,7 +17,7 @@
 - name: Install GitLab
   ansible.builtin.package:
     name:
-      - gitlab-ee=18.0.2-ee.0
+      - gitlab-ee=18.7.0-ee.0
     state: present
   environment:
     EXTERNAL_URL: "{{ gitlab_url }}"
