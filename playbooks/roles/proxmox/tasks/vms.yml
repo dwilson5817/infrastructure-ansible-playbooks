@@ -64,7 +64,7 @@
               on-link: true
 
 - name: Provision new Proxmox VM with cloud-init configuration
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     node: "{{ proxmox_host }}"
     api_user: "{{ proxmox_token_user }}"
     api_token_id: "{{ proxmox_token_id }}"
@@ -100,7 +100,7 @@
     tags: "{{ [ 'ansible' ] + item.props.tags }}"
 
 - name: Resize VM disk to specified size
-  community.general.proxmox_disk:
+  community.proxmox.proxmox_disk:
     api_host: "{{ item.props.host }}"
     api_user: "{{ proxmox_token_user }}"
     api_token_id: "{{ proxmox_token_id }}"
@@ -111,7 +111,7 @@
     state: resized
 
 - name: Configure VM network interface with specified MAC address
-  community.general.proxmox_nic:
+  community.proxmox.proxmox_nic:
     api_host: "{{ item.props.host }}"
     api_user: "{{ proxmox_token_user }}"
     api_token_id: "{{ proxmox_token_id }}"
@@ -143,7 +143,7 @@
     api_token: "{{ cloudflare_api_token }}"
 
 - name: Start VM and verify successful boot
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     node: "{{ proxmox_host }}"
     api_user: "{{ proxmox_token_user }}"
     api_token_id: "{{ proxmox_token_id }}"

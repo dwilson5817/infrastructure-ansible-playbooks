@@ -1,0 +1,18 @@
+---
+
+- name: Install python3-venv
+  ansible.builtin.package:
+    name: python3-venv
+    state: present
+
+- name: Create venv and install Proxmoxer 2.2.0
+  ansible.builtin.pip:
+    name:
+      - proxmoxer==2.2.0
+      - requests
+    virtualenv: /opt/ansible_venv
+    virtualenv_command: /usr/bin/python3 -m venv
+
+- name: Use the venv for subsequent Proxmox tasks
+  ansible.builtin.set_fact:
+    ansible_python_interpreter: /opt/ansible_venv/bin/python

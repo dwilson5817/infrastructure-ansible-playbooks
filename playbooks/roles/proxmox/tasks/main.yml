@@ -1,5 +1,8 @@
 ---
 
+- name: Configure Python environment
+  include_tasks: python.yml
+
 - name: Setup APT package repositories
   include_tasks: apt.yml
 
