@@ -1,4 +1,4 @@
-plugin: community.general.proxmox
+plugin: community.proxmox.proxmox
 
 url: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret']['url'] }}"
 user: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret']['user'] }}"
