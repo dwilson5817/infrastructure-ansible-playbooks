@@ -25,6 +25,7 @@
           - vault
           - zip
           - unzip
+          - tmux
 
           # For asdf Python
           - build-essential
