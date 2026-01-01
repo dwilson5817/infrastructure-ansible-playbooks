@@ -12,9 +12,6 @@
 - name: Configure ACME SSL certificates
   include_tasks: acme.yml
 
-- name: Configure storage volumes and directories
-  include_tasks: storage.yml
-
 - name: Install and configure NGINX
   ansible.builtin.import_role:
     name: nginxinc.nginx
@@ -85,20 +82,6 @@
     name: nginx.service
     state: reloaded
 
-- name: Create VM images directory
-  ansible.builtin.file:
-    path: /var/lib/vz/images/0
-    state: directory
-
-- name: Configure local storage content types
-  ansible.builtin.command: pvesh set /storage/local --content images,iso,vztmpl,backup
-
-- name: Download Debian cloud image
-  ansible.builtin.get_url:
-    url: "https://cloud.debian.org/images/cloud/bookworm/{{ template_version }}/debian-12-generic-amd64-{{ template_version }}.qcow2"
-    dest: "/var/lib/vz/images/0/debian-12-generic-amd64-{{ template_version }}.qcow2"
-    checksum: "sha512:{{ template_checksum }}"
-
 - name: Setup VMs with temporary API token
   block:
   - name: Generate temporary Proxmox API token
@@ -108,6 +91,20 @@
   - name: Store API token value
     ansible.builtin.set_fact:
       proxmox_token_secret: "{{ (proxmox_api_token_result.stdout | from_json).value }}"
+
+  - name: Configure storage volumes and directories
+    include_tasks: storage.yml
+
+  - name: Create VM images directory
+    ansible.builtin.file:
+      path: /var/lib/vz/images/0
+      state: directory
+
+  - name: Download Debian cloud image
+    ansible.builtin.get_url:
+      url: "https://cloud.debian.org/images/cloud/bookworm/{{ template_version }}/debian-12-generic-amd64-{{ template_version }}.qcow2"
+      dest: "/var/lib/vz/images/0/debian-12-generic-amd64-{{ template_version }}.qcow2"
+      checksum: "sha512:{{ template_checksum }}"
 
   - name: Create and configure virtual machines
     include_tasks: vms.yml
