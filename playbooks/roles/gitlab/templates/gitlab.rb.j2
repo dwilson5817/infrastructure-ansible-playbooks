@@ -1345,7 +1345,7 @@ gitlab_rails['gitlab_email_from'] = '{{ gitlab_config.email_from }}'
 # puma['enable'] = true
 # puma['ha'] = false
 # puma['worker_timeout'] = 60
-puma['worker_processes'] = 0
+# puma['worker_processes'] = 2
 # puma['min_threads'] = 4
 # puma['max_threads'] = 4
 
@@ -1405,7 +1405,7 @@ puma['worker_processes'] = 0
 # sidekiq['log_format'] = "json"
 # sidekiq['shutdown_timeout'] = 4
 # sidekiq['interval'] = nil
-sidekiq['concurrency'] = 5
+# sidekiq['concurrency'] = 20
 
 ##! GitLab allows route a job to a particular queue determined by an array of ##! routing rules.
 ##! Each routing rule is a tuple of queue selector query and corresponding queue. By default,
