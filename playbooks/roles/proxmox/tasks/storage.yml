@@ -5,18 +5,18 @@
 
 - name: Add NFS storage to Proxmox VE Cluster
   community.proxmox.proxmox_storage:
-    api_host: "{{ item.props.host }}"
+    api_host: "{{ proxmox_host }}"
     api_user: "{{ proxmox_token_user }}"
     api_token_id: "{{ proxmox_token_id }}"
     api_token_secret: "{{ proxmox_token_secret }}"
     nodes:
     - "{{ proxmox_host }}"
-    name: "{{ item.props.server }}"
+    name: "{{ item.server }}"
     type: nfs
     nfs_options:
-      server: "{{ item.props.server }}"
-      export: "{{ item.props.export }}"
+      server: "{{ item.server }}"
+      export: "{{ item.export }}"
     content:
     - backup
     state: present
-    loop: "{{ nfs_mounts }}"
+  loop: "{{ nfs_mounts }}"
