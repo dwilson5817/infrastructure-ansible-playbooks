@@ -12,6 +12,10 @@ template_version: 20250530-2128
 template_checksum: 00fc1e3c46ae8b418aaa67cab9efcf72b3826847881bac04cc06ab0eeb3f513d58c45c1f2896e71591cc297052a7bc864d35c2808948c49ed2836abba50e1f3a
 debian_version: 12
 
+nfs_mounts:
+- server: ftpback-rbx3-346.ovh.net
+  export: "/export/ftpbackup/ns3209869.ip-198-244-202.eu"
+
 vm_sizes:
   small:
     cores: 1
