@@ -1,4 +1,16 @@
 ---
 
+#- name: Configure node DNS resolvers and search domain
+#  ansible.builtin.command: pvesh set /nodes/london/dns --search dylanw.net --dns1 1.1.1.1 --dns2 8.8.8.8
+
 - name: Configure node DNS resolvers and search domain
-  ansible.builtin.command: pvesh set /nodes/london/dns --search dylanw.net --dns1 1.1.1.1 --dns2 8.8.8.8
+  community.proxmox.proxmox_node:
+    api_host: "{{ proxmox_host }}"
+    api_user: "{{ proxmox_token_user }}"
+    api_token_id: "{{ proxmox_token_id }}"
+    api_token_secret: "{{ proxmox_token_secret }}"
+    node_name: "{{ proxmox_host }}"
+    dns:
+      dns1: 1.1.1.1
+      dns2: 8.8.8.8
+      search: dylanw.net

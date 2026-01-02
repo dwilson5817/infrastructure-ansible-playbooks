@@ -6,9 +6,6 @@
 - name: Setup APT package repositories
   include_tasks: apt.yml
 
-- name: Setup DNS resolvers and search domain
-  include_tasks: dns.yml
-
 - name: Configure ACME SSL certificates
   include_tasks: acme.yml
 
@@ -92,6 +89,9 @@
     ansible.builtin.set_fact:
       proxmox_token_secret: "{{ (proxmox_api_token_result.stdout | from_json).value }}"
 
+  - name: Setup DNS resolvers and search domain
+    include_tasks: dns.yml
+
   - name: Configure storage volumes and directories
     include_tasks: storage.yml
 
@@ -111,6 +111,12 @@
     loop: "{{ proxmox_vms | dict2items(key_name='name', value_name='props') }}"
     vars:
       proxmox_ssh_keys: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCyJ88mt6hyT+Lxk9HD2B2hIyz8orzJJsoTAXNVQuYxTeQYZwJ2wnsK9+k4eD6/Q3/7f1cE6pG4cF/x8P5/xnw5KlCP+ENf4VfnjPOOF7gafJxsB5ECmZuhyWgjbKFt6J+ANTvEVVDWjgV4K5+s0KyZujK9gV2B4WW31ThqS7EIByH3lAu/o+nQd3Sptra5LlCs01/YxcWdPltmvGuyW5a770bAc/F83qjgNmdLGCAx8Dxx9jLLUjW6LxWWql593CCp6ZGIlk/3qmsxbT2E5EN0xAFgUiomFUFBY2mC+ED1gHBH9bP0MnUleFJ8ddbO96/1mr1h5RWUvbdj//wLaCevZ90o8N2+7j4X7RI1td2iePzowq+o5sO+klbEa+w4SDfKtXYrf6FtUbuXGQD+iL8OIVyTGVDSzQqVr2EPZLNqNLRcTIH4ZkzsXuDHexirA4b+rRGRXIrlQOtkO58U9NrvWthp0oCOx35I+GfW7y+pyS6Bljg9LlWFjUSulmSmF1U= dylan@desktop01'
+
+  - name: Configure backup jobs
+    include_tasks: backups.yml
+    loop: "{{ backup_jobs | dict2items }}"
+    loop_control:
+      extended: true
 
   always:
     - name: Delete temporary token

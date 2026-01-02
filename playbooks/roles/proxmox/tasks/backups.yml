@@ -1,0 +1,26 @@
+- name: Handle the error
+  block:
+    - name: Configure daily backup job
+      ansible.builtin.command: pvesh get /cluster/backup/{{ item.key }}
+  rescue:
+    - name: Create backup job if missing
+      ansible.builtin.command: >
+        pvesh create /cluster/backup --id {{ item.key }}
+        {% for opt_key, opt_val in item.value.items() %}
+        {% if opt_val is not string and opt_val is iterable %}
+        {% for v in opt_val %} --{{ opt_key | replace('_', '-') }} '{{ v }}'{% endfor %}
+        {% else %}
+        --{{ opt_key | replace('_', '-') }} '{{ opt_val }}'
+        {% endif %}
+        {% endfor %}
+
+- name: Update backup job if exists
+  ansible.builtin.command: >
+    pvesh set /cluster/backup/{{ item.key }}
+    {% for opt_key, opt_val in item.value.items() %}
+    {% if opt_val is not string and opt_val is iterable %}
+    {% for v in opt_val %} --{{ opt_key | replace('_', '-') }} '{{ v }}'{% endfor %}
+    {% else %}
+    --{{ opt_key | replace('_', '-') }} '{{ opt_val }}'
+    {% endif %}
+    {% endfor %}

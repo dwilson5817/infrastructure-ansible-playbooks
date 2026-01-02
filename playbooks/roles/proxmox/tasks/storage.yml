@@ -1,7 +1,24 @@
 ---
 
 - name: Configure Proxmox local storage allowed content types
-  ansible.builtin.command: pvesh set /storage/local --content vztmpl,images,iso,backup,snippets
+  community.proxmox.proxmox_storage:
+    api_host: "{{ proxmox_host }}"
+    api_user: "{{ proxmox_token_user }}"
+    api_token_id: "{{ proxmox_token_id }}"
+    api_token_secret: "{{ proxmox_token_secret }}"
+    nodes:
+      - "{{ proxmox_host }}"
+    name: local
+    type: dir
+    dir_options:
+      path: /var/lib/vz
+    content:
+      - vztmpl
+      - images
+      - iso
+      - backup
+      - snippets
+    state: present
 
 - name: Add NFS storage to Proxmox VE Cluster
   community.proxmox.proxmox_storage:

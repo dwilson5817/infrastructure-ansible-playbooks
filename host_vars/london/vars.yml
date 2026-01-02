@@ -16,6 +16,19 @@ nfs_mounts:
 - server: ftpback-rbx3-346.ovh.net
   export: "/export/ftpbackup/ns3209869.ip-198-244-202.eu"
 
+backup_jobs:
+  daily_backups:
+    all: true
+    prune_backups: keep-last=3
+    storage: ftpback-rbx3-346.ovh.net
+    schedule: 02:00
+    compress: zstd
+    comment: Daily backups
+    exclude:
+     - 101
+     - 109
+     - 110
+
 vm_sizes:
   small:
     cores: 1
@@ -51,7 +64,6 @@ proxmox_vms:
       - ip: 2001:41d0:800:3f6d:33fd:5021:4919:a13b
         mask: 128
       gateway: 2001:41d0:0800:3fff:00ff:00ff:00ff:00ff
-    gw:
     tags:
       - monitor
   web01:
