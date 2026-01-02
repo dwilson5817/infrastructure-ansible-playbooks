@@ -1,0 +1,41 @@
+services:
+  nginx:
+    image: namelessmc/nginx:v2.2.3
+    ports: [ '127.0.0.1:8101:8080' ]
+    volumes:
+      - type: bind
+        source: ./web
+        target: /data
+    depends_on: [ php ]
+    user: '1000'
+    cap_drop: [ 'ALL' ]
+    cap_add: [ 'NET_RAW' ]
+    mem_limit: 1024M
+    cpus: 1
+    ulimits:
+      nofile: 50000
+      nproc: 5000
+    security_opt: [ 'no-new-privileges:true' ]
+    restart: always
+
+  php:
+    image: namelessmc/php:v2.2.3
+    volumes:
+      - type: bind # same as web container
+        source: ./web
+        target: /data
+      - target: /tmp
+        tmpfs:
+          size: 25M
+        type: tmpfs
+    user: '1000'
+    cap_drop: ['ALL']
+    cap_add: ['NET_RAW']
+    cpus: 2
+    mem_limit: 2048M
+    read_only: true
+    ulimits:
+      nofile: 5000
+      nproc: 5000
+    security_opt: ['no-new-privileges:true']
+    restart: always

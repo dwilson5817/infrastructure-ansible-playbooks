@@ -1,0 +1,39 @@
+<?php
+
+return [
+    'mysql' => [
+        'host' => '{{ nameless_config.db.host }}',
+        'port' => '{{ nameless_config.db.port }}',
+        'username' => '{{ nameless_config.db.user }}',
+        'password' => '{{ nameless_config.db.password }}',
+        'db' => '{{ nameless_config.db.name }}',
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_unicode_ci',
+        'initialise_charset' => true,
+        'initialise_collation' => true,
+    ],
+    'remember' => [
+        'cookie_name' => 'nl2',
+        'cookie_expiry' => 604800,
+    ],
+    'session' => [
+        'session_name' => '2user',
+        'admin_name' => '2admin',
+        'token_name' => '2token',
+    ],
+    'core' => [
+        'hostname' => 'www.minersrealm.net',
+        'path' => '',
+        'friendly' => true,
+        'force_https' => false,
+        'force_www' => false,
+        'captcha' => false,
+        'date_format' => 'd M Y, H:i',
+        'trustedProxies' => [
+            '10.0.0.0/8',
+            '172.16.0.0/12',
+            '192.168.0.0/16'
+        ],
+        'installed' => true,
+    ],
+];

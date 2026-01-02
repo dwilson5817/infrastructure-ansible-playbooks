@@ -27,3 +27,11 @@
 
 - name: Configure Pterodactyl
   include_tasks: pterodactyl.yml
+
+- name: Configure NamelessMC
+  include_tasks: nameless.yml
+  vars:
+    nameless_assets:
+      - "{{ nameless_core_version | replace('.', '') }}.zip"
+      - "Nameless-Lithium-{{ nameless_lithium_version }}.zip"
+      - "Nameless-Tebex-{{ nameless_tebex_version }}.zip"

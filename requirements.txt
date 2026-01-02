@@ -6,6 +6,12 @@ ansible==11.13.0
 requests==2.32.5
 proxmoxer==2.2.0
 
+## amazon.aws.s3_object plugin
+# boto3: Needed to make requests to AWS
+# botocore: Low-level interface used by boto3
+boto3==1.42.19
+botocore==1.42.19
+
 ## community.hashi_vault
 # hvac: Python client for HashiCorp Vault
 hvac==2.4.0

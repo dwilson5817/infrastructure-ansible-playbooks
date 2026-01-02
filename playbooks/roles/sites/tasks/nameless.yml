@@ -1,0 +1,49 @@
+---
+
+- name: Create directory for NamelessMC
+  ansible.builtin.file:
+    path: /srv/www/minersrealm.net/www
+    state: directory
+    owner: ansible
+    group: ansible
+
+- name: Create data directory for NamelessMC
+  ansible.builtin.file:
+    path: /srv/www/minersrealm.net/www/web
+    state: directory
+    owner: ansible
+    group: ansible
+
+- name: Deploy NamelessMC Docker composition
+  ansible.builtin.template:
+    src: nameless/docker-compose.yml.j2
+    dest: /srv/www/minersrealm.net/www/docker-compose.yml
+
+- name: Bring Docker containers up for NamelessMC
+  community.docker.docker_compose_v2:
+    project_src: /srv/www/minersrealm.net/www
+
+- name: Download NamelessMC assets from S3 locally
+  amazon.aws.s3_object:
+    bucket: infrastructure-ansible-playbooks-assets
+    object: "playbooks/roles/sites/files/{{ item }}"
+    dest: "/tmp/{{ item }}"
+    mode: get
+  loop: "{{ nameless_assets }}"
+  delegate_to: localhost
+
+- name: Extract assets for NamelessMC to web directory
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ item }}"
+    dest: /srv/www/minersrealm.net/www/web
+  loop: "{{ nameless_assets }}"
+
+- name: Deploy NamelessMC configuration
+  ansible.builtin.template:
+    src: nameless/config.php.j2
+    dest: /srv/www/minersrealm.net/www/web/core/config.php
+
+- name: Deploy Lithium configuration
+  ansible.builtin.template:
+    src: nameless/config.json.j2
+    dest: /srv/www/minersrealm.net/www/web/custom/templates/Lithium/_settings/storage/config.json

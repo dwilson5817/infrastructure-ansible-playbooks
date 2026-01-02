@@ -2,6 +2,8 @@ execute-ansible:
   id_tokens:
     ANSIBLE_HASHI_VAULT_JWT:
       aud: https://vault.dylanw.net
+    GITLAB_OIDC_TOKEN:
+      aud: https://gitlab.dylanw.dev
   stage: deploy
   image: python:3.13.4
   script:
@@ -10,8 +12,8 @@ execute-ansible:
     - ssh-keygen -t rsa -q -f "$HOME/.ssh/id_rsa" -N ""
 
     # curl and jq are used for making API request to Vault, sshpass is used by Ansible for connecting to use the 'ssh'
-    # connection type with passwords
-    - apt update && apt install -y curl jq sshpass
+    # connection type with passwords and, awscli will be used to get temporary credentials from STS
+    - apt update && apt install -y curl jq sshpass awscli
 
     # Use GitLab JWT token to obtain a Vault token
     - 'export VAULT_TOKEN=$(curl --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"gitlab\" }" "$VAULT_ADDR/v1/auth/gitlab-jwt/login" | jq -r ".auth.client_token")'
@@ -21,6 +23,18 @@ execute-ansible:
 
     # Install Python requirements (including Ansible)
     - pip install -r requirements.txt
+
+    # Get temporary credentials from STS and store them as environment variables which will be picked up by the Ansible
+    # S3 plugin.  This is required for Ansible to access the S3 bucket containing the assets for deployment.
+    - >
+      export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s"
+      $(aws sts assume-role-with-web-identity
+      --role-arn ${ROLE_ARN}
+      --role-session-name "GitLabRunner-${CI_PROJECT_ID}-${CI_PIPELINE_ID}"
+      --web-identity-token ${GITLAB_OIDC_TOKEN}
+      --duration-seconds 3600
+      --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
+      --output text))
 
     # Install Ansible roles and collections
     - ansible-galaxy install -r requirements.yml

@@ -1,5 +1,6 @@
 ---
 
+vault_mariadb_passwords: "{{ lookup('community.hashi_vault.vault_kv2_get', 'sql/mariadb/passwords', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
 vault_pterodactyl: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/pterodactyl', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
 
 dns_records:
@@ -16,5 +17,17 @@ web_certs:
     alternative_domains:
     - panel.minersrealm.net
     - www.minersrealm.net
+
+nameless_core_version: 2.2.4
+nameless_lithium_version: 1.33
+nameless_tebex_version: 1.4.0
+
+nameless_config:
+  db:
+    host: sql.dylanw.net
+    port: 3306
+    user: miners
+    password: "{{ vault_mariadb_passwords['miners'] }}"
+    name: miners_website
 
 pterodactyl_env: "{{ vault_pterodactyl }}"
