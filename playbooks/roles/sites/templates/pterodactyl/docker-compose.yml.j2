@@ -2,9 +2,11 @@ services:
   cache:
     image: redis:alpine
     restart: always
+    pull_policy: every_12h
   panel:
     image: ghcr.io/pterodactyl/panel:latest
     restart: always
+    pull_policy: every_12h
     ports:
       - "127.0.0.1:8100:80"
     links:
