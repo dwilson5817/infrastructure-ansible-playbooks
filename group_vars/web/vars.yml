@@ -1,0 +1,8 @@
+backup_jobs:
+  www_minersrealm_net_daily:
+    hour: "22"
+    minute: "03"
+    local_dir: "/var/backups/www_minersrealm_net"
+    command: >-
+      tar -czf /var/backups/www_minersrealm_net/$(date +\%F).tar.gz -C /srv/www/minersrealm.net www &&
+      find /var/backups/www_minersrealm_net -name "*.tar.gz" -mtime +3 -delete
