@@ -7,3 +7,5 @@
       become: yes
     - role: wings
       become: yes
+    - role: backups
+      become: yes

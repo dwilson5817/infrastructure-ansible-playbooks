@@ -5,3 +5,9 @@ vault_wings_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'game/wing
 wings_uuid: "{{ vault_wings_config['uuid'] }}"
 wings_token_id: "{{ vault_wings_config['token_id'] }}"
 wings_token: "{{ vault_wings_config['token'] }}"
+
+backup_jobs:
+  pterodactyl_daily:
+    hour: "00"
+    minute: "00"
+    local_dir: "/var/lib/pterodactyl/backups"

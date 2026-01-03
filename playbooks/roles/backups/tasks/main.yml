@@ -76,7 +76,7 @@
     minute: "{{ item.value.minute | default('0') }}"
     hour: "{{ item.value.hour | default('2') }}"
     job: >
-      {{ item.value.command }} &&
+      {% if item.value.command is defined and item.value.command %}{{ item.value.command }} && {% endif %}
       rsync -avz {{ item.value.local_dir }}/ rsync_net:backups/{{ inventory_hostname }}/{{ item.key }}/ &&
       ssh rsync_net "find backups/{{ inventory_hostname }}/{{ item.key }} -type f -mtime +{{ rsync_net_retention_days }} -delete"
   loop: "{{ backup_jobs | dict2items }}"
