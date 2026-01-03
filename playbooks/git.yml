@@ -13,6 +13,8 @@
               - '*.pages.dylanw.dev'
     - role: gitlab
       become: yes
+    - role: backups
+      become: yes
   handlers:
     - name: Reconfigure GitLab after certificates changed
       become: yes

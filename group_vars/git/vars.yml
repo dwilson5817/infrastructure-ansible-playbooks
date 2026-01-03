@@ -1,0 +1,6 @@
+backup_jobs:
+  gitlab_daily:
+    hour: "02"
+    minute: "00"
+    local_dir: "/var/opt/gitlab/backups"
+    command: "/opt/gitlab/bin/gitlab-backup create CRON=1"

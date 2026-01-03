@@ -38,18 +38,6 @@
   command: gitlab-ctl reconfigure
   when: gitlab_template_file.changed
 
-- name: Ensure cron is installed
-  ansible.builtin.package:
-    name: cron
-    state: present
-
-- name: Create cron job to backup GitLab daily at 10.15pm
-  ansible.builtin.cron:
-    name: GitLab daily backup
-    minute: 15
-    hour: 22
-    job: "/opt/gitlab/bin/gitlab-backup create CRON=1"
-
 - name: Get information on initial_root_password
   ansible.builtin.stat:
     path: /etc/gitlab/initial_root_password

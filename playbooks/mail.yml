@@ -9,6 +9,14 @@
       state: present
       update_cache: yes
     become: yes
+  - name: Ensure backup directory exists
+    ansible.builtin.file:
+      path: "/var/backups/mailcow"
+      state: directory
+      owner: root
+      group: root
+      mode: '0775'
+    become: yes
   roles:
   - role: dns
   - role: geerlingguy.docker
@@ -20,3 +28,5 @@
     become: yes
     vars:
       mailcow__hostname: "{{ mail_hostname }}"
+  - role: backups
+    become: yes

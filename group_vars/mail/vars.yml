@@ -1,0 +1,6 @@
+backup_jobs:
+  mailcow_daily:
+    hour: "01"
+    minute: "00"
+    local_dir: "/var/backups/mailcow"
+    command: "cd /opt/mailcow-dockerized/; MAILCOW_BACKUP_LOCATION=/var/backups/mailcow ./helper-scripts/backup_and_restore.sh backup all --delete-days 3"

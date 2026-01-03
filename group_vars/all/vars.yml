@@ -4,6 +4,7 @@ vault_acme: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/acme', engine
 vault_ansible: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/ansible', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
 vault_cloudflare: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/cloudflare', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
 vault_prometheus_exporters_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/exporters/users', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+vault_rsync_net: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/rsync_net', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
 
 ansible_ssh_user: "{{ vault_ansible['ssh_user'] }}"
 
@@ -20,3 +21,9 @@ cloudflare_zone_id: "{{ vault_cloudflare['zone_id'] }}"
 
 node_exporter_basic_auth_users: "{{ vault_prometheus_exporters_users }}"
 mysqld_exporter_basic_auth_users: "{{ vault_prometheus_exporters_users }}"
+
+rsync_net_user: "{{ vault_rsync_net['user'] }}"
+rsync_net_host: "{{ vault_rsync_net['host'] }}"
+rsync_net_private_key: "{{ vault_rsync_net['private_key'] }}"
+rsync_net_public_key: "{{ vault_rsync_net['public_key'] }}"
+rsync_net_retention_days: 7
