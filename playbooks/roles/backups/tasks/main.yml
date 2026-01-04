@@ -78,5 +78,5 @@
     job: >
       {% if item.value.command is defined and item.value.command %}{{ item.value.command }} && {% endif %}
       rsync -avz {{ item.value.local_dir }}/ rsync_net:backups/{{ inventory_hostname }}/{{ item.key }}/ &&
-      ssh rsync_net "find backups/{{ inventory_hostname }}/{{ item.key }} -type f -mtime +{{ rsync_net_retention_days }} -delete"
+      ssh rsync_net "find backups/{{ inventory_hostname }}/{{ item.key }} -mindepth 1 -maxdepth 1 -mtime +{{ rsync_net_retention_days }} -exec rm -rf {} \+"
   loop: "{{ backup_jobs | dict2items }}"
