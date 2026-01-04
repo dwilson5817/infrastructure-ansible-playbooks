@@ -19,6 +19,8 @@ mariadb_users:
   host: game01.london.dylanw.net
 - name: miners
   host: game02.london.dylanw.net
+- name: sqladm
+  host: desktop01.london.dylanw.net
 
 mariadb_dbs:
 - antrim_website
