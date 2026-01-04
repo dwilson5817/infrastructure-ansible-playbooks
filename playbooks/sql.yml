@@ -1,6 +1,15 @@
 ---
 
 - hosts: sql
+  pre_tasks:
+    - name: Ensure backup directory exists
+      ansible.builtin.file:
+        path: "/var/backups/mariadb"
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+      become: yes
   roles:
     - role: dns
     - role: repos
@@ -18,6 +27,8 @@
         - mariadb-backup
         - libmariadb3
     - role: mariadb
+      become: yes
+    - role: backups
       become: yes
     - role: prometheus.prometheus.mysqld_exporter
       vars:

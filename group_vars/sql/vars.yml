@@ -1,0 +1,8 @@
+---
+
+backup_jobs:
+  mariadb:
+    command: 'mariadb -N -s -e "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN (\"mysql\", \"performance_schema\", \"information_schema\", \"sys\")" | while read db; do mariadb-dump --single-transaction --quick "$db" | gzip > "/var/backups/mariadb/${db}_$(date +\%F).sql.gz"; done && find /var/backups/mariadb -type f -mtime +3 -delete'
+    local_dir: "/var/backups/mariadb"
+    hour: "04"
+    minute: "00"
