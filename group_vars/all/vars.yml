@@ -1,5 +1,7 @@
 ---
 
+ansible_hashi_vault_engine_mount_point: secrets/infrastructure/ansible-playbooks
+
 vault_acme: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/acme')['secret'] }}"
 vault_ansible: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/ansible')['secret'] }}"
 vault_cloudflare: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/cloudflare')['secret'] }}"
