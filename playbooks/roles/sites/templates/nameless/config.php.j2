@@ -30,10 +30,19 @@ return [
         'captcha' => false,
         'date_format' => 'd M Y, H:i',
         'trustedProxies' => [
-            '10.0.0.0/8',
-            '172.16.0.0/12',
-            '192.168.0.0/16'
+            0 => '10.0.0.0/8',
+            1 => '172.16.0.0/12',
+            2 => '192.168.0.0/16',
         ],
         'installed' => true,
+    ],
+    'email' => [
+        'email' => '{{ nameless_config.email.email }}',
+        'username' => '{{ nameless_config.email.username }}',
+        'password' => '{{ nameless_config.email.password }}',
+        'name' => '{{ nameless_config.email.name }}',
+        'host' => '{{ nameless_config.email.host }}',
+        'port' => {{ nameless_config.email.port }},
+        'secure' => '{{ nameless_config.email.secure }}',
     ],
 ];
