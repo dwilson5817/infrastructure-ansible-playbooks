@@ -1,10 +1,8 @@
 plugin: community.proxmox.proxmox
 
-ansible_hashi_vault_engine_mount_point: secrets/infrastructure/ansible-playbooks
-
-url: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials')['secret']['url'] }}"
-user: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials')['secret']['user'] }}"
-password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials')['secret']['password'] }}"
+url: "{{ lookup('community.hashi_vault.vault_kv2_get', engine_mount_point='secrets/infrastructure/ansible-playbooks', 'proxmox/proxmox-credentials')['secret']['url'] }}"
+user: "{{ lookup('community.hashi_vault.vault_kv2_get', engine_mount_point='secrets/infrastructure/ansible-playbooks', 'proxmox/proxmox-credentials')['secret']['user'] }}"
+password: "{{ lookup('community.hashi_vault.vault_kv2_get', engine_mount_point='secrets/infrastructure/ansible-playbooks', 'proxmox/proxmox-credentials')['secret']['password'] }}"
 
 validate_certs: false
 
