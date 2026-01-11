@@ -31,7 +31,7 @@
 
         - path: /etc/ssh/trusted-user-ca-keys.pem
           content: |
-            {{ lookup('ansible.builtin.url', 'https://vault.dylanw.net/v1/infrastructure/ansible-playbooks/ssh-clients/public_key') }}
+            {{ lookup('ansible.builtin.url', 'https://vault.dylanw.net/v1/infrastructure/ssh-user/public_key') }}
 
 - name: Generate and write cloud-init network configuration
   ansible.builtin.copy:
