@@ -1,6 +1,6 @@
 ---
 
-vault_mariadb_passwords: "{{ lookup('community.hashi_vault.vault_kv2_get', 'sql/mariadb/passwords')['secret'] }}"
+vault_mariadb_passwords: "{{ lookup('community.hashi_vault.vault_kv2_get', 'sql/mariadb/passwords', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
 
 dns_records:
   - zone: dylanw.net

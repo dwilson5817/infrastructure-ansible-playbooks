@@ -1,7 +1,7 @@
 ---
 
-vault_grafana: "{{ lookup('community.hashi_vault.vault_kv2_get', 'monitor/grafana')['secret'] }}"
-vault_prometheus_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'monitor/prometheus/users')['secret'] }}"
+vault_grafana: "{{ lookup('community.hashi_vault.vault_kv2_get', 'monitor/grafana', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
+vault_prometheus_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'monitor/prometheus/users', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
 
 prometheus_zone: "dylanw.net"
 prometheus_hostname: "prometheus.dylanw.net"

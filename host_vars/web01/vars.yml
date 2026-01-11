@@ -1,8 +1,8 @@
 ---
 
-vault_mariadb_passwords: "{{ lookup('community.hashi_vault.vault_kv2_get', 'sql/mariadb/passwords')['secret'] }}"
-vault_pterodactyl: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/pterodactyl')['secret'] }}"
-vault_nameless_email: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/nameless/email')['secret'] }}"
+vault_mariadb_passwords: "{{ lookup('community.hashi_vault.vault_kv2_get', 'sql/mariadb/passwords', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
+vault_pterodactyl: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/pterodactyl', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
+vault_nameless_email: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/nameless/email', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
 
 dns_records:
   - zone: minersrealm.net

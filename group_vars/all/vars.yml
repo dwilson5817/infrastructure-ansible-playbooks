@@ -2,11 +2,11 @@
 
 ansible_hashi_vault_engine_mount_point: secrets/infrastructure/ansible-playbooks
 
-vault_acme: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/acme')['secret'] }}"
-vault_ansible: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/ansible')['secret'] }}"
-vault_cloudflare: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/cloudflare')['secret'] }}"
-vault_prometheus_exporters_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/exporters/users')['secret'] }}"
-vault_rsync_net: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/rsync_net')['secret'] }}"
+vault_acme: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/acme', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
+vault_ansible: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/ansible', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
+vault_cloudflare: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/cloudflare', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
+vault_prometheus_exporters_users: "{{ lookup('community.hashi_vault.vault_kv2_get', engine_mount_point='secrets/infrastructure/ansible-playbooks', 'all/exporters/users')['secret'] }}"
+vault_rsync_net: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/rsync_net', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
 
 ansible_ssh_user: "{{ vault_ansible['ssh_user'] }}"
 
