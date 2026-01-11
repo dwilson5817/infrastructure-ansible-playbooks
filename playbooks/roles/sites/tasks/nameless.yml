@@ -47,3 +47,11 @@
   ansible.builtin.template:
     src: nameless/config.json.j2
     dest: /srv/www/minersrealm.net/www/web/custom/templates/Lithium/_settings/storage/config.json
+
+- name: Deploy MCQuery.php to NamelessMC
+  ansible.builtin.copy:
+    src: MCQuery.php
+    dest: /srv/www/minersrealm.net/www/web/core/classes/Minecraft/MCQuery.php
+    owner: ansible
+    group: ansible
+    mode: '0644'
