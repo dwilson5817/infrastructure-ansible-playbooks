@@ -1,6 +1,6 @@
 ---
 
-vault_proxmox: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+vault_proxmox: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials')['secret'] }}"
 
 # Secrets from Vault
 ansible_ssh_user: "{{ vault_proxmox['ssh_user'] }}"

@@ -1,5 +1,5 @@
 ---
 
-gitlab_runner_tokens: "{{ lookup('community.hashi_vault.vault_kv2_get', 'runner/runner-tokens', engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+gitlab_runner_tokens: "{{ lookup('community.hashi_vault.vault_kv2_get', 'runner/runner-tokens')['secret'] }}"
 
 gitlab_runner_token: "{{ gitlab_runner_tokens[inventory_hostname_short] }}"

@@ -1,6 +1,6 @@
 ---
 
-vault_wings_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'game/wings/' + inventory_hostname_short, engine_mount_point='infrastructure/ansible-playbooks/secrets')['secret'] }}"
+vault_wings_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'game/wings/' + inventory_hostname_short)['secret'] }}"
 
 wings_uuid: "{{ vault_wings_config['uuid'] }}"
 wings_token_id: "{{ vault_wings_config['token_id'] }}"
