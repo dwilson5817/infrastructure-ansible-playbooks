@@ -14,6 +14,11 @@
   roles:
   - role: updates
     become: true
+  - role: motd
+    become: true
+    vars:
+      motd_script_path: /etc/update-motd.d/50-system-info
+      motd_fallback_path: /etc/motd
   - role: acme
     vars:
       acme_certs:
@@ -44,3 +49,7 @@
       name: node_exporter
       state: restarted
     listen: acme_certs_changed
+  - name: Reload sshd
+    ansible.builtin.service:
+      name: ssh
+      state: reloaded
