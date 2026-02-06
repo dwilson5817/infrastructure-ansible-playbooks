@@ -3,6 +3,16 @@
 - hosts: monitor
   roles:
   - role: dns
+  - role: prometheus.prometheus.blackbox_exporter
+    vars:
+      blackbox_exporter_web_listen_address: "localhost:9115"
+      blackbox_exporter_configuration_modules:
+        http_2xx:
+          prober: http
+          timeout: 5s
+          http:
+            method: GET
+            valid_status_codes: [ 200 ]
   - role: prometheus.prometheus.prometheus
     vars:
       ansible_host_key_checking: false
@@ -57,6 +67,27 @@
             - source_labels: [ __address__ ]
               regex: "([^:]+):\\d+"
               target_label: instance
+        - job_name: 'blackbox'
+          metrics_path: /probe
+          params:
+            module: [ http_2xx ]  # Look for a HTTP 200 response.
+          static_configs:
+            - targets:
+                - https://www.dylanw.dev
+                - https://blog.dylanw.dev
+                - https://resume.dylanw.dev
+                - https://check.dylanw.dev
+                - https://portal.dylanw.dev
+                - https://market.dylanw.dev
+                - https://www.minersrealm.net
+                - https://www.antrimtiling.com
+          relabel_configs:
+            - source_labels: [__address__]
+              target_label: __param_target
+            - source_labels: [__param_target]
+              target_label: instance
+            - target_label: __address__
+              replacement: localhost:9115  # The blackbox exporter's real hostname:port.
       prometheus_alert_rules:
         # -------------------------
         # Availability / exporters
@@ -404,6 +435,10 @@
           folder: 'Prometheus'
         - dashboard_id: 7362
           revision_id: 5
+          datasource: prometheus
+          folder: 'Exporters'
+        - dashboard_id: 13659
+          revision_id: 1
           datasource: prometheus
           folder: 'Exporters'
   - role: nginxinc.nginx
