@@ -351,6 +351,36 @@
             message: '{% raw %}Clock on {{ $labels.instance }} is not synchronising. Ensure NTP is configured on this host.{% endraw %}'
 
         # -------------------------
+        # Blackbox
+        # -------------------------
+        - alert: SiteHttpStatusUnexpected
+          expr: 'probe_success{job="blackbox"} == 0 and probe_http_status_code{job="blackbox"} != 0'
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: '{% raw %}[{{ $labels.instance }}] Unexpected HTTP status: {{ $value | printf "%.0f" }}{% endraw %}'
+            description: '{% raw %}{{ $labels.instance }} returned an unexpected HTTP response code ({{ $value | printf "%.0f" }}).{% endraw %}'
+
+        - alert: SiteUnreachable
+          expr: 'probe_success{job="blackbox"} == 0 and probe_http_status_code{job="blackbox"} == 0'
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: '{% raw %}[{{ $labels.instance }}] Site unreachable{% endraw %}'
+            description: '{% raw %}{{ $labels.instance }} is unreachable (no HTTP response received). Possible causes include DNS failure, TCP connection failure, TLS handshake failure, or request timeout.{% endraw %}'
+
+        - alert: SiteSslCertExpiringSoon
+          expr: '(probe_ssl_earliest_cert_expiry{job="blackbox"} - time()) < 14 * 24 * 3600'
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: '{% raw %}[{{ $labels.instance }}] SSL certificate expiring soon{% endraw %}'
+            description: '{% raw %}{{ $labels.instance }} SSL certificate expires in less than 14 days.{% endraw %}'
+
+        # -------------------------
         # MySQL / MariaDB
         # -------------------------
         - alert: MySQLServerDown
