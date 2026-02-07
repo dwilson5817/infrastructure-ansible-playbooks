@@ -449,12 +449,26 @@
     vars:
       grafana_ini:
         instance_name: "{{ grafana_hostname }}"
-        root_url: "https://{{ grafana_hostname }}"
         server:
           http_addr: 127.0.0.1
+          root_url: "https://{{ grafana_hostname }}"
         security:
-          admin_user: "{{ grafana_admin_username }}"
-          admin_password: "{{ grafana_admin_password }}"
+          disable_initial_admin_creation: yes
+          # These options are ignored if disable_initial_admin_creation is set to true
+          # They are set to avoid the Ansible task from failing when checking if they are set
+          admin_user: admin
+          admin_password: admin
+        auth:
+          disable_login_form: yes
+          gitlab:
+            enabled: yes
+            client_id: "{{ grafana_gitlab_oauth_application_id }}"
+            client_secret: "{{ grafana_gitlab_oauth_secret }}"
+            auth_url: https://gitlab.dylanw.dev/oauth/authorize
+            token_url: https://gitlab.dylanw.dev/oauth/token
+            # All users get 'Viewer' access
+            role_attribute_path: "'Viewer'"
+            skip_org_role_sync: no
       grafana_datasources:
         - name: prometheus
           type: prometheus

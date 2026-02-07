@@ -12,8 +12,8 @@ grafana_hostname: "monitoring.dylanw.net"
 
 prometheus_basic_auth_users: "{{ vault_prometheus_users }}"
 
-grafana_admin_username: dylan
-grafana_admin_password: "{{ vault_grafana['admin_password'] }}"
+grafana_gitlab_oauth_application_id: "{{ vault_grafana['gitlab_oauth_application_id'] }}"
+grafana_gitlab_oauth_secret: "{{ vault_grafana['gitlab_oauth_secret'] }}"
 
 dns_records:
   - zone: "{{ prometheus_zone }}"
