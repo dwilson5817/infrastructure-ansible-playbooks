@@ -466,6 +466,7 @@
             client_secret: "{{ grafana_gitlab_oauth_secret }}"
             auth_url: https://gitlab.dylanw.dev/oauth/authorize
             token_url: https://gitlab.dylanw.dev/oauth/token
+            auto_login: yes
             # All users get 'Viewer' access
             role_attribute_path: "'Viewer'"
             skip_org_role_sync: no
