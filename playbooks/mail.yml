@@ -28,5 +28,6 @@
     become: yes
     vars:
       mailcow__hostname: "{{ mail_hostname }}"
+      mailcow__config_http_redirect: y
   - role: backups
     become: yes

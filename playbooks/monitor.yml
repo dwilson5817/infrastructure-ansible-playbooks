@@ -73,14 +73,24 @@
             module: [ http_2xx ]  # Look for a HTTP 200 response.
           static_configs:
             - targets:
-                - https://www.dylanw.dev
-                - https://blog.dylanw.dev
-                - https://resume.dylanw.dev
-                - https://check.dylanw.dev
-                - https://portal.dylanw.dev
-                - https://market.dylanw.dev
-                - https://www.minersrealm.net
-                - https://www.antrimtiling.com
+                # dylanw.dev
+                - www.dylanw.dev
+                - blog.dylanw.dev
+                - resume.dylanw.dev
+                - check.dylanw.dev
+                - portal.dylanw.dev
+                - market.dylanw.dev
+                - gitlab.dylanw.dev
+                # antrimtiling.com
+                - www.antrimtiling.com
+                # minersrealm.net
+                - www.minersrealm.net
+                - panel.minersrealm.net
+                # dylanw.net
+                - monitoring.dylanw.net
+                - mail.dylanw.net
+#                - vault.dylanw.net      # doesn't have port 80 open in AWS
+#                - prometheus.dylanw.net # needs authentication
           relabel_configs:
             - source_labels: [__address__]
               target_label: __param_target
@@ -471,6 +481,7 @@
           revision_id: 1
           datasource: prometheus
           folder: 'Exporters'
+      grafana_provisioning_synced: yes
   - role: nginxinc.nginx
     become: yes
   - role: acme
@@ -505,9 +516,14 @@
             servers:
               - core:
                   listen:
+                    - port: 80
+                    - port: 80
+                      address: '[::]'
+                    - port: 443
+                      address: '[::]'
+                      ssl: true
                     - port: 443
                       ssl: true
-                    - port: 80
                   server_name: "{{ grafana_hostname }}"
                   root: /usr/share/nginx/html
                   index: index.html index.htm
@@ -567,9 +583,14 @@
             servers:
               - core:
                   listen:
+                    - port: 80
+                    - port: 80
+                      address: '[::]'
+                    - port: 443
+                      address: '[::]'
+                      ssl: true
                     - port: 443
                       ssl: true
-                    - port: 80
                   server_name: "{{ prometheus_hostname }}"
                   root: /usr/share/nginx/html
                   index: index.html index.htm

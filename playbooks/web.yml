@@ -46,6 +46,8 @@
                 - core:
                     listen:
                       - port: 80
+                      - port: 80
+                        address: '[::]'
                       - port: 443
                         address: '[::]'
                         ssl: true
@@ -90,9 +92,16 @@
                             value: $remote_addr
                           - field: X-Forwarded-Proto
                             value: $scheme
+                  custom_directives:
+                    - >
+                      if ($scheme != "https") {
+                          return 301 https://$host$request_uri;
+                      }
                 - core:
                     listen:
                       - port: 80
+                      - port: 80
+                        address: '[::]'
                       - port: 443
                         address: '[::]'
                         ssl: true
@@ -137,6 +146,11 @@
                              value: $remote_addr
                            - field: X-Forwarded-Proto
                              value: $scheme
+                  custom_directives:
+                    - >
+                      if ($scheme != "https") {
+                          return 301 https://$host$request_uri;
+                      }
   handlers:
     - name: Restart nginx after certificates changed
       become: yes
