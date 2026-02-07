@@ -1,4 +1,4 @@
-backup_jobs:
+rsync_net_backup_jobs:
   www_minersrealm_net_daily:
     hour: "22"
     minute: "03"

@@ -1,4 +1,4 @@
-backup_jobs:
+rsync_net_backup_jobs:
   mailcow_daily:
     hour: "01"
     minute: "00"

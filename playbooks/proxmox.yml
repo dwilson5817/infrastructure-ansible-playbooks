@@ -3,3 +3,5 @@
 - hosts: proxmox_nodes
   roles:
   - role: proxmox
+  - role: backups
+    become: yes

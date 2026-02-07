@@ -114,7 +114,7 @@
 
   - name: Configure backup jobs
     include_tasks: backups.yml
-    loop: "{{ backup_jobs | dict2items }}"
+    loop: "{{ proxmox_backup_jobs | dict2items }}"
     loop_control:
       extended: true
 
