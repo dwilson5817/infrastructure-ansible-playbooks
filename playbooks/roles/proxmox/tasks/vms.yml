@@ -75,7 +75,7 @@
     cores: "{{ item.props.size.cores }}"
     memory: "{{ item.props.size.memory }}"
     scsi:
-      scsi0: "local:0,import-from=local:0/debian-12-generic-amd64-{{ template_version }}.qcow2,format=qcow2"
+      scsi0: "local:0,import-from=local:0/debian-{{ template_debian_version }}-generic-amd64-{{ template_version }}.qcow2,format=qcow2"
     ide:
       ide2: 'local:cloudinit,format=qcow2'
     serial: '{"serial0":"socket"}'

@@ -8,9 +8,10 @@ ansible_ssh_pass: "{{ vault_proxmox['ssh_password'] }}"
 
 proxmox_host: london
 
-template_version: 20250530-2128
-template_checksum: 00fc1e3c46ae8b418aaa67cab9efcf72b3826847881bac04cc06ab0eeb3f513d58c45c1f2896e71591cc297052a7bc864d35c2808948c49ed2836abba50e1f3a
-debian_version: 12
+template_version: 20260220-2394
+template_checksum: 8e7becf9843224e31a271df5eb6aa90a8077642786996f88f299d4f16043c9bfc563a74437ebfe17990c58362176c309cc61c6f09a83f1c274d799dd02997d4d
+template_debian_version: 13
+template_debian_codename: trixie
 
 nfs_mounts:
 - server: ftpback-rbx3-346.ovh.net
