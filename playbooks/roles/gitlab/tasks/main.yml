@@ -25,7 +25,7 @@
 
 - name: Wait for 1 minute after GitLab installation
   ansible.builtin.wait_for:
-    timeout: 600
+    timeout: 60
   when: install_gitlab.changed
 
 - name: Install GitLab configuration file template
