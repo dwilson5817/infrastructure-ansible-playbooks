@@ -499,6 +499,11 @@
       grafana_provisioning_synced: yes
   - role: nginxinc.nginx
     become: yes
+    vars:
+      # Debian 13 (Trixie) has removed the 'apt-key' utility entirely.  The 'nginxinc.nginx' role fails when trying to
+      # add the NGINX-specific signing key because it relies on that missing binary.  By setting 'os_repository', we use
+      # the official Debian-provided NGINX package, bypassing the need for third-party keys and shims.
+      nginx_install_from: os_repository
   - role: acme
     become: yes
     vars:
