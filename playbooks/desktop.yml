@@ -48,6 +48,25 @@
   - role: geerlingguy.docker
     become: yes
   post_tasks:
+    - name: Allow unprivileged user namespaces (Required for Debian)
+      ansible.posix.sysctl:
+        name: kernel.unprivileged_userns_clone
+        value: '1'
+        state: present
+        reload: yes
+      become: yes
+
+    - name: Ensure dependencies for Rootless Docker are installed
+      ansible.builtin.package:
+        name:
+          - dbus-user-session
+          - slirp4netns
+          - fuse-overlayfs
+          - uidmap
+          - docker-ce-rootless-extras
+        state: present
+      become: yes
+
     - name: Create user account for dylan
       ansible.builtin.user:
         name: dylan
@@ -55,17 +74,37 @@
         shell: /usr/bin/zsh
       become: yes
 
-    - name: Ensure docker group exists
-      ansible.builtin.group:
-        name: docker
-        state: present
+    - name: Fetch dylan's user info
+      ansible.builtin.getent:
+        database: passwd
+        key: dylan
 
-    - name: Add dylan user to docker group
-      ansible.builtin.user:
-        name: dylan
-        groups: docker
-        append: yes
+    - name: Enable lingering for dylan
+      ansible.builtin.command: "loginctl enable-linger dylan"
+      args:
+        creates: "/var/lib/systemd/linger/dylan"
       become: yes
+
+    - name: Install Rootless Docker for dylan
+      ansible.builtin.shell:
+        cmd: "dockerd-rootless-setuptool.sh install"
+      become: yes
+      become_user: dylan
+      environment:
+        XDG_RUNTIME_DIR: "/run/user/{{ getent_passwd['dylan'][1] }}"
+      args:
+        creates: "/home/dylan/.config/systemd/user/docker.service"
+
+    - name: Ensure Docker user service is started and enabled
+      ansible.builtin.systemd:
+        name: docker
+        scope: user
+        enabled: yes
+        state: started
+      become: yes
+      become_user: dylan
+      environment:
+        XDG_RUNTIME_DIR: "/run/user/{{ getent_passwd['dylan'][1] }}"
 
     - name: Configure .my.cnf for dylan
       ansible.builtin.copy:
