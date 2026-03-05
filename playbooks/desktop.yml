@@ -85,6 +85,12 @@
         creates: "/var/lib/systemd/linger/dylan"
       become: yes
 
+    - name: Ensure ACL package is installed for unprivileged become
+      ansible.builtin.package:
+        name: acl
+        state: present
+      become: yes
+
     - name: Install Rootless Docker for dylan
       ansible.builtin.shell:
         cmd: "dockerd-rootless-setuptool.sh install"
