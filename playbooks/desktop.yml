@@ -2,29 +2,27 @@
 
 - hosts: desktop
   pre_tasks:
-    - name: Ensure gpg and apt-transport-https are installed for adding HashiCorp apt repository
+    - name: Ensure gnupg is installed
       ansible.builtin.apt:
-        name:
-          - gnupg
-          - software-properties-common
-          - apt-transport-https
+        name: gnupg
         state: present
         update_cache: yes
       become: yes
 
-    - name: Install HashiCorp GPG key
-      ansible.builtin.get_url:
-        url: https://apt.releases.hashicorp.com/gpg
-        dest: /usr/share/keyrings/hashicorp-archive-keyring.asc
-        mode: '0644'
+    - name: Download and dearmor HashiCorp GPG key
+      ansible.builtin.shell:
+        cmd: curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+        creates: /usr/share/keyrings/hashicorp-archive-keyring.gpg
       become: yes
 
     - name: Add HashiCorp apt repository
       ansible.builtin.apt_repository:
         filename: hashicorp
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.asc] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+        # Note the change from .asc to .gpg here
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+        state: present
       become: yes
-
+      
     - name: Install system packages and development dependencies
       ansible.builtin.package:
         name:
