@@ -5,4 +5,4 @@ rsync_net_backup_jobs:
     local_dir: "/var/opt/gitlab/backups"
     command: "/opt/gitlab/bin/gitlab-backup create CRON=1"
 
-gitlab_version: gitlab-ee=18.8.4-ee.0
+gitlab_version: gitlab-ee=18.8.5-ee.0
