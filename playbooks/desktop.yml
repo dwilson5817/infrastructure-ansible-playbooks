@@ -37,6 +37,7 @@
           - tmux
           - curl
           - git
+          - jq
 
           # Ansible
           - sshpass
