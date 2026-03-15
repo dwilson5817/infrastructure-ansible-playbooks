@@ -80,6 +80,7 @@
       ide2: 'local:cloudinit,format=qcow2'
     serial: '{"serial0":"socket"}'
     cicustom: "user=local:snippets/{{ item.props.id }}-cloud-init-user.yml,network=local:snippets/{{ item.props.id }}-cloud-init-network.yml"
+    cpu: host
     ostype: l26
     description: |
       {{ item.name }} is an Ansible-managed server!

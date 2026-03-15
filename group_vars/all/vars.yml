@@ -29,3 +29,10 @@ rsync_net_host: "{{ vault_rsync_net['host'] }}"
 rsync_net_private_key: "{{ vault_rsync_net['private_key'] }}"
 rsync_net_public_key: "{{ vault_rsync_net['public_key'] }}"
 rsync_net_retention_days: 7
+
+vault_aws_roles_anywhere: "{{ lookup('community.hashi_vault.vault_kv2_get', 'aws/roles-anywhere/backups/' + ansible_fqdn, engine_mount_point='secrets/infrastructure/ansible-playbooks', errors='ignore')['secret'] | default(omit, true) }}"
+
+aws_backups_bucket: "{{ vault_aws_roles_anywhere['backups_bucket'] | default(none) }}"
+aws_profile_arn: "{{ vault_aws_roles_anywhere['profile_arn'] | default(none) }}"
+aws_role_arn: "{{ vault_aws_roles_anywhere['role_arn'] | default(none) }}"
+aws_trust_anchor_arn: "{{ vault_aws_roles_anywhere['trust_anchor_arn'] | default(none) }}"

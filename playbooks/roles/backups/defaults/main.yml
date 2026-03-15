@@ -1,0 +1,4 @@
+aws_backup_user: "root"
+aws_backup_group: "root"
+aws_key_path: "/etc/ssl/private"
+aws_cert_path: "/etc/ssl/certs"

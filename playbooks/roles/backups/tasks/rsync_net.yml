@@ -1,0 +1,82 @@
+---
+
+- name: Ensure SSH directory exists for the root user
+  file:
+    path: /root/.ssh
+    state: directory
+    mode: '0700'
+
+- name: Generate SSH key for rsync.net backups
+  community.crypto.openssh_keypair:
+    path: /root/.ssh/id_ed25519_rsync_net
+    type: ed25519
+    comment: "backup-key-{{ inventory_hostname }}"
+
+- name: Create SSH config entry for rsync.net
+  blockinfile:
+    path: /root/.ssh/config
+    create: yes
+    block: |
+      Host rsync_net
+          HostName {{ rsync_net_host }}
+          User {{ rsync_net_user }}
+          IdentityFile /root/.ssh/id_ed25519_rsync_net
+          BatchMode yes
+          StrictHostKeyChecking accept-new
+
+- name: Read the public key
+  slurp:
+    src: /root/.ssh/id_ed25519_rsync_net.pub
+  register: rsync_pubkey
+
+- name: Check if host key is already authorized on rsync.net
+  ansible.builtin.shell: |
+    ssh -o BatchMode=yes -o ConnectTimeout=5 rsync_net 'ls'
+  register: rsync_ssh_test
+  ignore_errors: yes
+  changed_when: false
+
+- name: Register new host key using Master Key from Vault
+  block:
+    - name: Temporarily write Master Private Key
+      ansible.builtin.copy:
+        content: "{{ rsync_net_private_key }}"
+        dest: /root/.ssh/id_ed25519_rsync_net_master
+        mode: '0600'
+      no_log: true
+
+    - name: Append host public key to rsync.net using Master Key
+      ansible.builtin.shell: |
+        echo "{{ rsync_pubkey['content'] | b64decode }}" | \
+        ssh -i /root/.ssh/id_ed25519_rsync_net_master -o StrictHostKeyChecking=accept-new \
+        {{ rsync_net_user }}@{{ rsync_net_host }} 'dd of=.ssh/authorized_keys oflag=append conv=notrunc'
+
+    - name: Remove Master Private Key
+      ansible.builtin.file:
+        path: /root/.ssh/id_ed25519_rsync_net_master
+        state: absent
+  when: rsync_ssh_test.rc != 0
+
+- name: Ensure cron and rsync are installed
+  ansible.builtin.package:
+    name:
+      - cron
+      - rsync
+    state: present
+
+- name: Ensure remote backup directories exist on rsync.net
+  ansible.builtin.shell: |
+    ssh rsync_net "mkdir -p backups/{{ inventory_hostname }}/{{ item.key }}"
+  loop: "{{ rsync_net_backup_jobs | dict2items }}"
+  changed_when: false
+
+- name: Create cron jobs for daily backups
+  ansible.builtin.cron:
+    name: "Backup job: {{ item.key }}"
+    minute: "{{ item.value.minute | default('0') }}"
+    hour: "{{ item.value.hour | default('2') }}"
+    job: >
+      {% if item.value.command is defined and item.value.command %}{{ item.value.command }} && {% endif %}
+      rsync -avz {{ item.value.local_dir }}/ rsync_net:backups/{{ inventory_hostname }}/{{ item.key }}/ &&
+      ssh rsync_net "find backups/{{ inventory_hostname }}/{{ item.key }} -mindepth 1 -maxdepth 1 -mtime +{{ rsync_net_retention_days }} -exec rm -rf {} \+"
+  loop: "{{ rsync_net_backup_jobs | dict2items }}"
