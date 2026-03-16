@@ -2,6 +2,7 @@
 
 - name: Configure backups to AWS
   include_tasks: aws.yml
+  when: backups_aws_enabled | default(true) | bool
 
 - name: Configure backups to rsync.net
   include_tasks: rsync_net.yml

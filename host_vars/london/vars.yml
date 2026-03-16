@@ -17,6 +17,8 @@ nfs_mounts:
 - server: ftpback-rbx3-346.ovh.net
   export: "/export/ftpbackup/ns3209869.ip-198-244-202.eu"
 
+backups_aws_enabled: false
+
 rsync_net_retention_days: 3
 
 rsync_net_backup_jobs:
