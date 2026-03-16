@@ -71,6 +71,7 @@
     hour: "{{ item.value.hour | default('2') }}"
     job: >
       /usr/local/bin/aws s3 sync {{ item.value.local_dir }} s3://{{ aws_backups_bucket }}/{{ item.key }}/
+      --storage-class DEEP_ARCHIVE
       --profile backups-profile
       --only-show-errors
   loop: "{{ rsync_net_backup_jobs | dict2items }}"
