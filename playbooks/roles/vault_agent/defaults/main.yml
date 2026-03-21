@@ -1,0 +1,7 @@
+vault_agent_version: "1.18.0"
+vault_agent_config_dir: "/etc/vault-agent"
+vault_agent_token_sink: "/etc/vault-agent/token"
+vault_agent_user: "vault"
+vault_agent_group: "vault"
+
+aws_roles_anywhere_cert_dir: "/etc/certs/aws-roles-anywhere"

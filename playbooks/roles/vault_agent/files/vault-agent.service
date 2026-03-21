@@ -1,0 +1,19 @@
+[Unit]
+Description=Vault Agent
+Documentation=https://developer.hashicorp.com/vault/docs/agent
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+User=vault
+Group=vault
+ExecStart=/usr/local/bin/vault agent -config=/etc/vault-agent/vault-agent.hcl
+ExecReload=/bin/kill --signal HUP $MAINPID
+KillMode=process
+KillSignal=SIGTERM
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

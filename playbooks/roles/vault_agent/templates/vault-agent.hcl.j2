@@ -1,0 +1,58 @@
+vault {
+  address = "{{ lookup('ansible.builtin.env', 'VAULT_ADDR') }}"
+}
+
+auto_auth {
+  method "approle" {
+    config = {
+      role_id_file_path                   = "{{ vault_agent_config_dir }}/role-id"
+      secret_id_file_path                 = "{{ vault_agent_config_dir }}/wrapped-secret-id"
+      secret_id_response_wrapping_path    = "auth/approle/role/{{ inventory_hostname }}/secret-id"
+      remove_secret_id_file_after_reading = true
+    }
+  }
+
+  sink "file" {
+    reuse_token = true
+    config = {
+      path = "{{ vault_agent_token_sink }}"
+      mode = 0640
+    }
+  }
+}
+
+template {
+  contents = <<EOT
+{% raw %}
+{{- with pkiCert "infrastructure/aws-roles-anywhere-pki/issue/backup-client-{% endraw %}{{ inventory_hostname }}{% raw %}" "common_name={% endraw %}{{ ansible_fqdn }}{% raw %}" "ttl=24h" -}}
+{{ .Data.Key }}
+{{- end }}
+{% endraw %}
+EOT
+  destination = "{{ aws_roles_anywhere_cert_dir }}/private.key"
+  perms       = 0600
+}
+
+template {
+  contents = <<EOT
+{% raw %}
+{{- with pkiCert "infrastructure/aws-roles-anywhere-pki/issue/backup-client-{% endraw %}{{ inventory_hostname }}{% raw %}" "common_name={% endraw %}{{ ansible_fqdn }}{% raw %}" "ttl=24h" -}}
+{{ .Data.Cert }}
+{{- end }}
+{% endraw %}
+EOT
+  destination = "{{ aws_roles_anywhere_cert_dir }}/certificate.crt"
+  perms       = 0644
+}
+
+template {
+  contents = <<EOT
+{% raw %}
+{{- with pkiCert "infrastructure/aws-roles-anywhere-pki/issue/backup-client-{% endraw %}{{ inventory_hostname }}{% raw %}" "common_name={% endraw %}{{ ansible_fqdn }}{% raw %}" "ttl=24h" -}}
+{{ .Data.CA }}
+{{- end }}
+{% endraw %}
+EOT
+  destination = "{{ aws_roles_anywhere_cert_dir }}/chain.pem"
+  perms       = 0644
+}

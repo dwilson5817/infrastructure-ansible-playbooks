@@ -9,41 +9,6 @@
     mode: '0755'
     checksum: "sha256:4ec587c4b2a7a4b2980f0fb084c3fabd99a862ce1091341ba514ae3c0923b905"
 
-- name: Request Certificate from Vault
-  community.hashi_vault.vault_pki_generate_certificate:
-    engine_mount_point: "infrastructure/aws-roles-anywhere-pki"
-    role_name: "backup-client"
-    common_name: "{{ ansible_fqdn }}"
-  register: vault_cert
-  become: no
-  delegate_to: localhost
-  run_once: false
-
-- name: Write Private Key to Disk
-  ansible.builtin.copy:
-    content: "{{ vault_cert.data.data.private_key }}"
-    dest: "{{ aws_key_path }}/aws-backup.key"
-    owner: "{{ aws_backup_user }}"
-    group: "{{ aws_backup_group }}"
-    mode: '0600'
-  no_log: true
-
-- name: Write Leaf Certificate to Disk
-  ansible.builtin.copy:
-    content: "{{ vault_cert.data.data.certificate }}"
-    dest: "{{ aws_cert_path }}/aws-backup.crt"
-    owner: "{{ aws_backup_user }}"
-    group: "{{ aws_backup_group }}"
-    mode: '0644'
-
-- name: Write Intermediate Chain to Disk
-  ansible.builtin.copy:
-    content: "{{ vault_cert.data.data.ca_chain | join('\n') }}"
-    dest: "{{ aws_cert_path }}/aws-backup-chain.pem"
-    owner: "{{ aws_backup_user }}"
-    group: "{{ aws_backup_group }}"
-    mode: '0644'
-
 - name: Ensure .aws directory exists
   ansible.builtin.file:
     path: "~{{ aws_backup_user }}/.aws"
@@ -62,7 +27,7 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK: AWS ROLES ANYWHERE"
     block: |
       [profile backups-profile]
-      credential_process = /usr/local/bin/aws_signing_helper credential-process --certificate {{ aws_cert_path }}/aws-backup.crt --private-key {{ aws_key_path }}/aws-backup.key --intermediates {{ aws_cert_path }}/aws-backup-chain.pem --trust-anchor-arn {{ aws_trust_anchor_arn }} --profile-arn {{ aws_profile_arn }} --role-arn {{ aws_role_arn }}
+      credential_process = /usr/local/bin/aws_signing_helper credential-process --certificate {{ aws_roles_anywhere_cert }} --private-key {{ aws_roles_anywhere_key }} --intermediates {{ aws_roles_anywhere_chain }} --trust-anchor-arn {{ aws_trust_anchor_arn }} --profile-arn {{ aws_profile_arn }} --role-arn {{ aws_role_arn }}
 
 - name: Create cron jobs for AWS S3 backups
   ansible.builtin.cron:

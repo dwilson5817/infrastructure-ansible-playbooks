@@ -1,4 +1,7 @@
 aws_backup_user: "root"
 aws_backup_group: "root"
-aws_key_path: "/etc/ssl/private"
-aws_cert_path: "/etc/ssl/certs"
+
+aws_roles_anywhere_dir: "/etc/certs/aws-roles-anywhere"
+aws_roles_anywhere_cert: "{{ aws_roles_anywhere_dir }}/certificate.crt"
+aws_roles_anywhere_key: "{{ aws_roles_anywhere_dir }}/private.key"
+aws_roles_anywhere_chain: "{{ aws_roles_anywhere_dir }}/chain.pem"

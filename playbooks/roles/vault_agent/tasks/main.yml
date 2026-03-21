@@ -1,0 +1,154 @@
+---
+
+- name: Create 'vault' system group
+  ansible.builtin.group:
+    name: "{{ vault_agent_group }}"
+    system: true
+    state: present
+
+- name: Create 'vault' system user
+  ansible.builtin.user:
+    name: "{{ vault_agent_user }}"
+    group: "{{ vault_agent_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+    state: present
+
+- name: Create certs base directory
+  ansible.builtin.file:
+    path: "/etc/certs"
+    state: directory
+    owner: vault
+    group: vault
+    mode: '0750'
+
+- name: Create aws-roles-anywhere cert directory
+  ansible.builtin.file:
+    path: "{{ aws_roles_anywhere_cert_dir }}"
+    state: directory
+    owner: vault
+    group: vault
+    mode: '0750'
+
+- name: Install Vault Agent binary
+  ansible.builtin.get_url:
+    url: "https://releases.hashicorp.com/vault/{{ vault_agent_version }}/vault_{{ vault_agent_version }}_linux_amd64.zip"
+    dest: "/tmp/vault_{{ vault_agent_version }}_linux_amd64.zip"
+    mode: '0644'
+
+- name: Unzip Vault Agent binary
+  ansible.builtin.unarchive:
+    src: "/tmp/vault_{{ vault_agent_version }}_linux_amd64.zip"
+    dest: /usr/local/bin
+    remote_src: true
+    creates: /usr/local/bin/vault
+
+- name: Create Vault Agent config directory
+  ansible.builtin.file:
+    path: "{{ vault_agent_config_dir }}"
+    state: directory
+    owner: "{{ vault_agent_user }}"
+    group: "{{ vault_agent_group }}"
+    mode: '0750'
+
+- name: Create PKI role for {{ inventory_hostname }}
+  community.hashi_vault.vault_write:
+    path: "infrastructure/aws-roles-anywhere-pki/roles/backup-client-{{ inventory_hostname }}"
+    data:
+      allowed_domains: "{{ ansible_fqdn }}"
+      allow_bare_domains: true
+      allow_subdomains: false
+      max_ttl: "24h"
+      ttl: "24h"
+  delegate_to: localhost
+  become: no
+
+- name: Create Vault policy for {{ inventory_hostname }}
+  community.hashi_vault.vault_write:
+    path: "sys/policies/acl/issue-backup-client-certificate-{{ inventory_hostname }}"
+    data:
+      policy: |
+        path "infrastructure/aws-roles-anywhere-pki/issue/backup-client-{{ inventory_hostname }}" {
+          capabilities = [ "create", "update" ]
+        }
+  delegate_to: localhost
+  become: no
+
+- name: Create AppRole for {{ inventory_hostname }}
+  community.hashi_vault.vault_write:
+    path: "auth/approle/role/{{ inventory_hostname }}"
+    data:
+      token_policies: "base-vm, issue-backup-client-certificate-{{ inventory_hostname }}"
+      token_ttl: "1h"
+      token_max_ttl: "4h"
+      secret_id_ttl: "10m"
+      secret_id_num_uses: 1
+      bind_secret_id: true
+  delegate_to: localhost
+  become: no
+
+- name: Check if Vault Agent token sink exists
+  ansible.builtin.stat:
+    path: "{{ vault_agent_token_sink }}"
+  register: vault_agent_token
+
+- name: Fetch AppRole role_id from Vault
+  community.hashi_vault.vault_read:
+    path: "auth/approle/role/{{ inventory_hostname }}/role-id"
+  register: approle_role_id
+  delegate_to: localhost
+  when: not vault_agent_token.stat.exists
+  become: no
+
+- name: Generate a wrapped secret ID from Vault
+  community.hashi_vault.vault_write:
+    path: "auth/approle/role/{{ inventory_hostname }}/secret-id"
+    wrap_ttl: "10m"
+  register: wrapped_secret_id
+  delegate_to: localhost
+  when: not vault_agent_token.stat.exists
+  become: no
+
+- name: Write role ID to VM
+  ansible.builtin.copy:
+    content: "{{ approle_role_id.data.data.role_id }}"
+    dest: "{{ vault_agent_config_dir }}/role-id"
+    owner: "{{ vault_agent_user }}"
+    group: "{{ vault_agent_group }}"
+    mode: '0640'
+  when: not vault_agent_token.stat.exists
+
+- name: Write wrapped secret ID token to VM
+  ansible.builtin.copy:
+    content: "{{ wrapped_secret_id.data.wrap_info.token }}"
+    dest: "{{ vault_agent_config_dir }}/wrapped-secret-id"
+    owner: "{{ vault_agent_user }}"
+    group: "{{ vault_agent_group }}"
+    mode: '0640'
+  when: not vault_agent_token.stat.exists
+
+- name: Deploy Vault Agent config
+  ansible.builtin.template:
+    src: vault-agent.hcl.j2
+    dest: "{{ vault_agent_config_dir }}/vault-agent.hcl"
+    owner: "{{ vault_agent_user }}"
+    group: "{{ vault_agent_group }}"
+    mode: '0640'
+  notify: restart vault-agent
+
+- name: Install Vault Agent systemd service
+  ansible.builtin.copy:
+    src: vault-agent.service
+    dest: /etc/systemd/system/vault-agent.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart vault-agent
+
+- name: Enable and start Vault Agent service
+  ansible.builtin.systemd:
+    name: vault-agent
+    enabled: true
+    state: started
+    daemon_reload: true
