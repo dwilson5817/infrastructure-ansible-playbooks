@@ -1,5 +1,10 @@
 ---
 
+- name: Ensure cron is installed
+  ansible.builtin.apt:
+    name: cron
+    state: present
+
 - name: Configure backups to AWS
   include_tasks: aws.yml
   when: backups_aws_enabled | default(true) | bool
