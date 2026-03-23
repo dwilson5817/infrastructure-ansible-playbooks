@@ -93,9 +93,15 @@
     path: "{{ vault_agent_token_sink }}"
   register: vault_agent_token
 
+- name: Read Vault Agent token from remote host
+  ansible.builtin.slurp:
+    src: "{{ vault_agent_token_sink }}"
+  register: vault_agent_token_contents
+  when: vault_agent_token.stat.exists
+
 - name: Check if Vault Agent token is valid
   ansible.builtin.set_fact:
-    vault_token_valid: "{{ lookup('community.hashi_vault.hashi_vault', 'auth/token/lookup-self', token=lookup('file', vault_agent_token_sink), auth_method='token', errors='ignore') }}"
+    vault_token_valid: "{{ lookup('community.hashi_vault.hashi_vault', 'auth/token/lookup-self', token=vault_agent_token_contents.content | b64decode | trim, auth_method='token', errors='ignore') }}"
   failed_when: false
   changed_when: false
   when: vault_agent_token.stat.exists
