@@ -25,31 +25,21 @@ template {
   contents = <<EOT
 {% raw %}
 {{- with pkiCert "infrastructure/aws-roles-anywhere-pki/issue/backup-client-{% endraw %}{{ inventory_hostname }}{% raw %}" "common_name={% endraw %}{{ ansible_fqdn }}{% raw %}" "ttl=24h" -}}
-{{ .Data.Key }}
+{{ .Cert }}{{ .CA }}{{ .Key }}
+{{ .Key | writeToFile "{% endraw %}{{ aws_roles_anywhere_cert_dir }}{% raw %}/private.key" "vault" "vault" "0600" }}
+{{ .Cert | writeToFile "{% endraw %}{{ aws_roles_anywhere_cert_dir }}{% raw %}/certificate.crt" "vault" "vault" "0644" }}
 {{- end }}
 {% endraw %}
 EOT
-  destination = "{{ aws_roles_anywhere_cert_dir }}/private.key"
+  destination = "{{ aws_roles_anywhere_cert_dir }}/bundle.pem"
   perms       = 0600
 }
 
 template {
   contents = <<EOT
 {% raw %}
-{{- with pkiCert "infrastructure/aws-roles-anywhere-pki/issue/backup-client-{% endraw %}{{ inventory_hostname }}{% raw %}" "common_name={% endraw %}{{ ansible_fqdn }}{% raw %}" "ttl=24h" -}}
-{{ .Data.Cert }}
-{{- end }}
-{% endraw %}
-EOT
-  destination = "{{ aws_roles_anywhere_cert_dir }}/certificate.crt"
-  perms       = 0644
-}
-
-template {
-  contents = <<EOT
-{% raw %}
-{{- with pkiCert "infrastructure/aws-roles-anywhere-pki/issue/backup-client-{% endraw %}{{ inventory_hostname }}{% raw %}" "common_name={% endraw %}{{ ansible_fqdn }}{% raw %}" "ttl=24h" -}}
-{{ .Data.CA }}
+{{- with secret "infrastructure/aws-roles-anywhere-pki/cert/ca_chain" -}}
+{{ .Data.ca_chain }}
 {{- end }}
 {% endraw %}
 EOT
