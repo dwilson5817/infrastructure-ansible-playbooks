@@ -1,6 +1,6 @@
 ---
 
-- name: restart vault-agent
+- name: reload vault-agent
   ansible.builtin.systemd:
     name: vault-agent
     state: reloaded

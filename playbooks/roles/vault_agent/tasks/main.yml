@@ -81,7 +81,7 @@
     data:
       token_policies: "base-vm, issue-backup-client-certificate-{{ inventory_hostname }}"
       token_ttl: "1h"
-      token_max_ttl: "4h"
+      token_max_ttl: "0"
       secret_id_ttl: "10m"
       secret_id_num_uses: 1
       bind_secret_id: true
@@ -93,13 +93,20 @@
     path: "{{ vault_agent_token_sink }}"
   register: vault_agent_token
 
+- name: Check if Vault Agent token is valid
+  ansible.builtin.set_fact:
+    vault_token_valid: "{{ lookup('community.hashi_vault.hashi_vault', 'auth/token/lookup-self', token=lookup('file', vault_agent_token_sink), auth_method='token', errors='ignore') }}"
+  failed_when: false
+  changed_when: false
+  when: vault_agent_token.stat.exists
+
 - name: Fetch AppRole role_id from Vault
   community.hashi_vault.vault_read:
     path: "auth/approle/role/{{ inventory_hostname }}/role-id"
   register: approle_role_id
   delegate_to: localhost
-  when: not vault_agent_token.stat.exists
   become: no
+  when: not vault_agent_token.stat.exists or not vault_token_valid
 
 - name: Generate a wrapped secret ID from Vault
   community.hashi_vault.vault_write:
@@ -107,8 +114,8 @@
     wrap_ttl: "10m"
   register: wrapped_secret_id
   delegate_to: localhost
-  when: not vault_agent_token.stat.exists
   become: no
+  when: not vault_agent_token.stat.exists or not vault_token_valid
 
 - name: Write role ID to VM
   ansible.builtin.copy:
@@ -117,7 +124,7 @@
     owner: "{{ vault_agent_user }}"
     group: "{{ vault_agent_group }}"
     mode: '0640'
-  when: not vault_agent_token.stat.exists
+  when: not vault_agent_token.stat.exists or not vault_token_valid
 
 - name: Write wrapped secret ID token to VM
   ansible.builtin.copy:
@@ -126,7 +133,13 @@
     owner: "{{ vault_agent_user }}"
     group: "{{ vault_agent_group }}"
     mode: '0640'
-  when: not vault_agent_token.stat.exists
+  when: not vault_agent_token.stat.exists or not vault_token_valid
+
+- name: Restart Vault Agent if token was invalid
+  ansible.builtin.systemd:
+    name: vault-agent
+    state: restarted
+  when: vault_agent_token.stat.exists and not vault_token_valid
 
 - name: Deploy Vault Agent config
   ansible.builtin.template:
@@ -135,7 +148,7 @@
     owner: "{{ vault_agent_user }}"
     group: "{{ vault_agent_group }}"
     mode: '0640'
-  notify: restart vault-agent
+  notify: reload vault-agent
 
 - name: Install Vault Agent systemd service
   ansible.builtin.copy:
@@ -144,7 +157,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: restart vault-agent
+  notify: reload vault-agent
 
 - name: Enable and start Vault Agent service
   ansible.builtin.systemd:
