@@ -31,18 +31,41 @@
     group: vault
     mode: '0750'
 
-- name: Install Vault Agent binary
+- name: Get installed Vault version
+  ansible.builtin.command: /usr/local/bin/vault version
+  register: vault_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Set vault_needs_install fact
+  ansible.builtin.set_fact:
+    vault_needs_install: >-
+      {{
+        vault_installed_version.rc != 0 or
+        vault_agent_version not in vault_installed_version.stdout
+      }}
+
+- name: Download Vault Agent binary
   ansible.builtin.get_url:
     url: "https://releases.hashicorp.com/vault/{{ vault_agent_version }}/vault_{{ vault_agent_version }}_linux_amd64.zip"
     dest: "/tmp/vault_{{ vault_agent_version }}_linux_amd64.zip"
+    checksum: "sha256:{{ vault_agent_checksum }}"
     mode: '0644'
+  when: vault_needs_install
 
-- name: Unzip Vault Agent binary
+- name: Unarchive Vault Agent binary
   ansible.builtin.unarchive:
     src: "/tmp/vault_{{ vault_agent_version }}_linux_amd64.zip"
     dest: /usr/local/bin
     remote_src: true
-    creates: /usr/local/bin/vault
+  when: vault_needs_install
+  notify: restart vault-agent
+
+- name: Clean up downloaded zip
+  ansible.builtin.file:
+    path: "/tmp/vault_{{ vault_agent_version }}_linux_amd64.zip"
+    state: absent
+  when: vault_needs_install
 
 - name: Create Vault Agent config directory
   ansible.builtin.file:

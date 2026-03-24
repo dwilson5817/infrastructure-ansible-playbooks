@@ -1,4 +1,5 @@
-vault_agent_version: "1.18.0"
+vault_agent_version: "1.21.4"
+vault_agent_checksum: "889b681990fe221b884b7932fa9c9dd0ee9811b9349554f1aa287ab63c9f3dae"
 vault_agent_config_dir: "/etc/vault-agent"
 vault_agent_token_sink: "/etc/vault-agent/token"
 vault_agent_user: "vault"
