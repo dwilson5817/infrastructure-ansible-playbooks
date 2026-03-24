@@ -13,7 +13,6 @@ auto_auth {
   }
 
   sink "file" {
-    reuse_token = true
     config = {
       path = "{{ vault_agent_token_sink }}"
       mode = 0640
