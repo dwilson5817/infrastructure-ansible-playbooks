@@ -75,7 +75,7 @@
     group: "{{ vault_agent_group }}"
     mode: '0750'
 
-- name: Create PKI role for {{ inventory_hostname }}
+- name: Create AWS Roles Anywhere PKI role
   community.hashi_vault.vault_write:
     path: "infrastructure/aws-roles-anywhere-pki/roles/backup-client-{{ inventory_hostname }}"
     data:
@@ -87,7 +87,7 @@
   delegate_to: localhost
   become: no
 
-- name: Create Vault policy for {{ inventory_hostname }}
+- name: Create backup client Vault policy
   community.hashi_vault.vault_write:
     path: "sys/policies/acl/issue-backup-client-certificate-{{ inventory_hostname }}"
     data:
@@ -98,7 +98,7 @@
   delegate_to: localhost
   become: no
 
-- name: Create AppRole for {{ inventory_hostname }}
+- name: Create AppRole role
   community.hashi_vault.vault_write:
     path: "auth/approle/role/{{ inventory_hostname }}"
     data:
