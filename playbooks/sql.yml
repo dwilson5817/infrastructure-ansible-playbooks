@@ -65,11 +65,11 @@
         name: sqladm
         password: "{{ mariadb_passwords.sqladm }}"
       become: yes
-    - name: Create database user with name 'bob' and password '12345' with all database privileges
+    - name: Create database user with all database privileges
       community.mysql.mysql_user:
         name: sqladm
         host: desktop01.london.dylanw.net
         password: "{{ mariadb_passwords.sqladm }}"
-        priv: '*.*:ALL'
+        priv: '*.*:ALL,GRANT'
         state: present
       become: yes
