@@ -460,12 +460,12 @@
           admin_password: admin
         auth:
           disable_login_form: yes
-          gitlab:
+          pocket_id:
             enabled: yes
-            client_id: "{{ grafana_gitlab_oauth_application_id }}"
-            client_secret: "{{ grafana_gitlab_oauth_secret }}"
-            auth_url: https://gitlab.dylanw.dev/oauth/authorize
-            token_url: https://gitlab.dylanw.dev/oauth/token
+            client_id: "{{ grafana_pocket_id_oidc_application_id }}"
+            client_secret: "{{ grafana_pocket_id_oidc_secret }}"
+            auth_url: https://auth.dylanw.net/authorize
+            token_url: https://auth.dylanw.net/api/oidc/token
             auto_login: yes
             # All users get 'Viewer' access
             role_attribute_path: "'Viewer'"

@@ -12,8 +12,8 @@ grafana_hostname: "monitoring.dylanw.net"
 
 prometheus_basic_auth_users: "{{ vault_prometheus_users }}"
 
-grafana_gitlab_oauth_application_id: "{{ vault_grafana['gitlab_oauth_application_id'] }}"
-grafana_gitlab_oauth_secret: "{{ vault_grafana['gitlab_oauth_secret'] }}"
+grafana_pocket_id_oidc_application_id: "{{ vault_grafana['pocket_id_oidc_application_id'] }}"
+grafana_pocket_id_oidc_secret: "{{ vault_grafana['pocket_id_oidc_secret'] }}"
 
 dns_records:
   - zone: "{{ prometheus_zone }}"
