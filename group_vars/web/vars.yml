@@ -1,3 +1,5 @@
+vault_pocket_id_env: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pocket-id/env/' + ansible_fqdn, engine_mount_point='secrets/infrastructure/ansible-playbooks', errors='ignore')['secret'] }}"
+
 rsync_net_backup_jobs:
   www_minersrealm_net_daily:
     hour: "22"
@@ -6,3 +8,13 @@ rsync_net_backup_jobs:
     command: >-
       tar -czf /var/backups/www_minersrealm_net/$(date +\%F).tar.gz -C /srv/www/minersrealm.net www &&
       find /var/backups/www_minersrealm_net -name "*.tar.gz" -mtime +3 -delete
+
+pocket_id_env_app_url: "{{ vault_pocket_id_env['app_url'] }}"
+pocket_id_env_encryption_key: "{{ vault_pocket_id_env['encryption_key'] }}"
+pocket_id_env_maxmind_license_key: "{{ vault_pocket_id_env['maxmind_license_key'] }}"
+pocket_id_env_smtp_host: "{{ vault_pocket_id_env['smtp_host'] }}"
+pocket_id_env_smtp_port: "{{ vault_pocket_id_env['smtp_port'] }}"
+pocket_id_env_smtp_user: "{{ vault_pocket_id_env['smtp_user'] }}"
+pocket_id_env_smtp_password: "{{ vault_pocket_id_env['smtp_password'] }}"
+pocket_id_env_smtp_from: "{{ vault_pocket_id_env['smtp_from'] }}"
+pocket_id_env_smtp_tls: "{{ vault_pocket_id_env['smtp_tls'] }}"

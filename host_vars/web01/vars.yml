@@ -5,6 +5,8 @@ vault_pterodactyl: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/pterod
 vault_nameless_email: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/nameless/email', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
 
 dns_records:
+  - zone: dylanw.net
+    record: auth.dylanw.net
   - zone: minersrealm.net
     record: minersrealm.net
   - zone: minersrealm.net
@@ -13,6 +15,11 @@ dns_records:
     record: panel.minersrealm.net
 
 web_certs:
+  dylanw.net:
+    cloudflare_zone: dylanw.net
+    alternative_domains:
+    - auth.dylanw.net
+    - www.dylanw.net
   minersrealm.net:
     cloudflare_zone: minersrealm.net
     alternative_domains:

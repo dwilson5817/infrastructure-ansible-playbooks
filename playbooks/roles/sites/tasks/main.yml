@@ -20,10 +20,18 @@
     group: ansible
   become: yes
 
+- name: Create directory for dylanw.net sites
+  ansible.builtin.file:
+    path: /srv/www/dylanw.net
+    state: directory
+
 - name: Create directory for MinersRealm sites
   ansible.builtin.file:
     path: /srv/www/minersrealm.net
     state: directory
+
+- name: Configure Pocket ID
+  include_tasks: pocket_id.yml
 
 - name: Configure Pterodactyl
   include_tasks: pterodactyl.yml
