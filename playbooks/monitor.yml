@@ -460,12 +460,14 @@
           admin_password: admin
         auth:
           disable_login_form: yes
-          pocket_id:
+          generic_oauth:
             enabled: yes
+            name: auth.dylanw.net
             client_id: "{{ grafana_pocket_id_oidc_application_id }}"
             client_secret: "{{ grafana_pocket_id_oidc_secret }}"
             auth_url: https://auth.dylanw.net/authorize
             token_url: https://auth.dylanw.net/api/oidc/token
+            scopes: openid profile email
             auto_login: yes
             # All users get 'Viewer' access
             role_attribute_path: "'Viewer'"
