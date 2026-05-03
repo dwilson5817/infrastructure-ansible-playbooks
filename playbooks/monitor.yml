@@ -463,8 +463,8 @@
           generic_oauth:
             enabled: yes
             name: auth.dylanw.net
-            client_id: "{{ grafana_pocket_id_oidc_application_id }}"
-            client_secret: "{{ grafana_pocket_id_oidc_secret }}"
+            client_id: "{{ grafana_generic_oauth_client_id }}"
+            client_secret: "{{ grafana_generic_oauth_client_secret }}"
             auth_url: https://auth.dylanw.net/authorize
             token_url: https://auth.dylanw.net/api/oidc/token
             scopes: openid profile email

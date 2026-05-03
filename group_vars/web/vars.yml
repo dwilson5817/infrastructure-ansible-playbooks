@@ -1,4 +1,4 @@
-vault_pocket_id_env: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pocket-id/env/' + ansible_fqdn, engine_mount_point='secrets/infrastructure/ansible-playbooks', errors='ignore')['secret'] }}"
+vault_pocket_id_env: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pocket-id/env', engine_mount_point='secrets/infrastructure/ansible-playbooks', errors='ignore')['secret'] }}"
 
 rsync_net_backup_jobs:
   www_minersrealm_net_daily:

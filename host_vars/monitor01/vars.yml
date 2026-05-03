@@ -1,8 +1,8 @@
 ---
 
-vault_grafana: "{{ lookup('community.hashi_vault.vault_kv2_get', 'monitor/grafana', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
 vault_prometheus_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'monitor/prometheus/users', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
 vault_prometheus_webhooks_gitlab: "{{ lookup('community.hashi_vault.vault_kv2_get', 'monitor/prometheus/webhooks/gitlab', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
+vault_pocket_id_clients_grafana: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pocket-id/clients/grafana', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
 
 prometheus_zone: "dylanw.net"
 prometheus_hostname: "prometheus.dylanw.net"
@@ -12,8 +12,8 @@ grafana_hostname: "monitoring.dylanw.net"
 
 prometheus_basic_auth_users: "{{ vault_prometheus_users }}"
 
-grafana_pocket_id_oidc_application_id: "{{ vault_grafana['pocket_id_oidc_application_id'] }}"
-grafana_pocket_id_oidc_secret: "{{ vault_grafana['pocket_id_oidc_secret'] }}"
+grafana_generic_oauth_client_id: "{{ vault_pocket_id_clients_grafana['client_id'] }}"
+grafana_generic_oauth_client_secret: "{{ vault_pocket_id_clients_grafana['client_secret'] }}"
 
 dns_records:
   - zone: "{{ prometheus_zone }}"
