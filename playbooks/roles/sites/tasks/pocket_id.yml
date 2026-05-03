@@ -19,6 +19,11 @@
       MAXMIND_LICENSE_KEY={{ pocket_id_env_maxmind_license_key }}
       PUID={{ ansible_user_uid }}
       PGID={{ ansible_user_gid }}
+      
+      # These can be configured through the UI, but we will store them as IaC
+      UI_CONFIG_DISABLED=true
+      APP_NAME=Auth Central
+      ACCENT_COLOR=amber
       SMTP_FROM={{ pocket_id_env_smtp_from }}
       SMTP_HOST={{ pocket_id_env_smtp_host }}
       SMTP_PASSWORD={{ pocket_id_env_smtp_password }}
