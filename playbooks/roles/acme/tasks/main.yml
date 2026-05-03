@@ -6,7 +6,7 @@
     state: present
 
 - name: Create required directories for ACME
-  file:
+  ansible.builtin.file:
     path: "{{ acme_dir_base }}/{{ item.value }}"
     state: directory
     owner: root
@@ -28,5 +28,5 @@
     group: certs
 
 - name: Issue ACME certificate(s)
-  include_tasks: certs.yml
+  ansible.builtin.include_tasks: certs.yml
   loop: "{{ ( acme_certs | default({}) ) | dict2items(key_name='domain', value_name='props') }}"

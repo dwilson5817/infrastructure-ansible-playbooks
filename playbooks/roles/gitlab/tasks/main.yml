@@ -35,7 +35,7 @@
   register: gitlab_template_file
 
 - name: Reconfigure GitLab
-  command: gitlab-ctl reconfigure
+  ansible.builtin.command: gitlab-ctl reconfigure
   when: gitlab_template_file.changed
 
 - name: Get information on initial_root_password

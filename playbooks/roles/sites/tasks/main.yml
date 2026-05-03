@@ -31,13 +31,13 @@
     state: directory
 
 - name: Configure Pocket ID
-  include_tasks: pocket_id.yml
+  ansible.builtin.include_tasks: pocket_id.yml
 
 - name: Configure Pterodactyl
-  include_tasks: pterodactyl.yml
+  ansible.builtin.include_tasks: pterodactyl.yml
 
 - name: Configure NamelessMC
-  include_tasks: nameless.yml
+  ansible.builtin.include_tasks: nameless.yml
   vars:
     nameless_assets:
       - "{{ nameless_core_version | replace('.', '') }}.zip"

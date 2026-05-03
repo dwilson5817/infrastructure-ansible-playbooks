@@ -18,5 +18,5 @@
   handlers:
     - name: Reconfigure GitLab after certificates changed
       become: yes
-      command: gitlab-ctl reconfigure
+      ansible.builtin.command: gitlab-ctl reconfigure
       listen: acme_certs_changed

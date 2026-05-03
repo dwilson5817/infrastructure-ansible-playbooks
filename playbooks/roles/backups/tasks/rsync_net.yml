@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure SSH directory exists for the root user
-  file:
+  ansible.builtin.file:
     path: /root/.ssh
     state: directory
     mode: '0700'
@@ -13,7 +13,7 @@
     comment: "backup-key-{{ inventory_hostname }}"
 
 - name: Create SSH config entry for rsync.net
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /root/.ssh/config
     create: yes
     block: |
@@ -25,7 +25,7 @@
           StrictHostKeyChecking accept-new
 
 - name: Read the public key
-  slurp:
+  ansible.builtin.slurp:
     src: /root/.ssh/id_ed25519_rsync_net.pub
   register: rsync_pubkey
 

@@ -1,5 +1,5 @@
 - name: "Create SSL certificates directory structure for {{ item.domain }}"
-  file:
+  ansible.builtin.file:
     path: "{{ acme_dir_base }}/{{ acme_dir_names.certs_dir }}/{{ item.domain }}"
     state: directory
     owner: root
@@ -37,7 +37,7 @@
     register: dns_challenge
 
   - name: "Configure DNS TXT records for ACME challenge validation of {{ item.domain }}"
-    include_tasks: dns_challenge.yml
+    ansible.builtin.include_tasks: dns_challenge.yml
     loop: "{{ dns_challenge.challenge_data_dns | dict2items }}"
     loop_control:
       loop_var: challenge
