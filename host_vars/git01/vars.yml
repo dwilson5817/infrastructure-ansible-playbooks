@@ -1,4 +1,8 @@
 vault_gitlab_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'git/gitlab/config')['secret'] }}"
+vault_pocket_id_clients_gitlab: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pocket-id/clients/gitlab')['secret'] }}"
+
+gitlab_openid_connect_client_id: "{{ vault_pocket_id_clients_gitlab['client_id'] }}"
+gitlab_openid_connect_client_secret: "{{ vault_pocket_id_clients_gitlab['client_secret'] }}"
 
 base_domain: dylanw.dev
 gitlab_domain: "gitlab.{{ base_domain }}"

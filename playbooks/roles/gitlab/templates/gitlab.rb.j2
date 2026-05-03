@@ -616,8 +616,8 @@ gitlab_rails['gitlab_email_from'] = '{{ gitlab_config.email_from }}'
 
 ### OmniAuth Settings
 ###! Docs: https://docs.gitlab.com/ee/integration/omniauth.html
-# gitlab_rails['omniauth_enabled'] = nil
-# gitlab_rails['omniauth_allow_single_sign_on'] = ['saml']
+gitlab_rails['omniauth_enabled'] = true
+gitlab_rails['omniauth_allow_single_sign_on'] = ['openid_connect']
 # gitlab_rails['omniauth_sync_email_from_provider'] = 'saml'
 # gitlab_rails['omniauth_sync_profile_from_provider'] = ['saml']
 # gitlab_rails['omniauth_sync_profile_attributes'] = ['email']
@@ -628,14 +628,29 @@ gitlab_rails['gitlab_email_from'] = '{{ gitlab_config.email_from }}'
 # gitlab_rails['omniauth_auto_link_user'] = ['twitter']
 # gitlab_rails['omniauth_external_providers'] = ['twitter', 'google_oauth2']
 # gitlab_rails['omniauth_allow_bypass_two_factor'] = ['google_oauth2']
-# gitlab_rails['omniauth_providers'] = [
-#   {
-#     "name" => "google_oauth2",
-#     "app_id" => "YOUR APP ID",
-#     "app_secret" => "YOUR APP SECRET",
-#     "args" => { "access_type" => "offline", "approval_prompt" => "" }
-#   }
-# ]
+gitlab_rails['omniauth_providers'] = [
+  {
+    name: "openid_connect",
+    label: "auth.dylanw.net",
+    icon: "https://auth.dylanw.net/api/application-images/logo",
+    args: {
+      name: "openid_connect",
+      scope: [ "openid", "profile", "email" ],
+      response_type: "code",
+      issuer: "https://auth.dylanw.net",
+      discovery: true,
+      client_auth_method: "query",
+      uid_field: "preferred_username",
+      send_scope_to_token_endpoint: "false",
+      pkce: true,
+      client_options: {
+        identifier: "{{ gitlab_openid_connect_client_id }}",
+        secret: "{{ gitlab_openid_connect_client_secret }}",
+        redirect_uri: "https://gitlab.dylanw.dev/users/auth/openid_connect/callback"
+      }
+    }
+  }
+]
 # gitlab_rails['omniauth_cas3_session_duration'] = 28800
 # gitlab_rails['omniauth_saml_message_max_byte_size'] = 250000
 
