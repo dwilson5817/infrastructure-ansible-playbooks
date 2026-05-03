@@ -2,11 +2,11 @@
 
 ansible_hashi_vault_engine_mount_point: secrets/infrastructure/ansible-playbooks
 
-vault_acme: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/acme', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
-vault_ansible: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/ansible', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
-vault_cloudflare: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/cloudflare', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
-vault_prometheus_exporters_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/exporters/users', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
-vault_rsync_net: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/rsync_net', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
+vault_acme: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/acme')['secret'] }}"
+vault_ansible: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/ansible')['secret'] }}"
+vault_cloudflare: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/cloudflare')['secret'] }}"
+vault_prometheus_exporters_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/exporters/users')['secret'] }}"
+vault_rsync_net: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/rsync_net')['secret'] }}"
 
 ansible_ssh_user: "{{ vault_ansible['ssh_user'] }}"
 
@@ -30,7 +30,7 @@ rsync_net_private_key: "{{ vault_rsync_net['private_key'] }}"
 rsync_net_public_key: "{{ vault_rsync_net['public_key'] }}"
 rsync_net_retention_days: 7
 
-vault_aws_roles_anywhere: "{{ lookup('community.hashi_vault.vault_kv2_get', 'aws/roles-anywhere/backups/' + ansible_fqdn, engine_mount_point='secrets/infrastructure/ansible-playbooks', errors='ignore')['secret'] | default(omit, true) }}"
+vault_aws_roles_anywhere: "{{ lookup('community.hashi_vault.vault_kv2_get', 'aws/roles-anywhere/backups/' + ansible_fqdn, errors='ignore')['secret'] | default(omit, true) }}"
 
 aws_backups_bucket: "{{ vault_aws_roles_anywhere['backups_bucket'] | default(none) }}"
 aws_profile_arn: "{{ vault_aws_roles_anywhere['profile_arn'] | default(none) }}"

@@ -1,4 +1,4 @@
-vault_mariadb_passwords: "{{ lookup('community.hashi_vault.vault_kv2_get', 'sql/mariadb/passwords', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret'] }}"
+vault_mariadb_passwords: "{{ lookup('community.hashi_vault.vault_kv2_get', 'sql/mariadb/passwords')['secret'] }}"
 
 maraidb_admin_host: sql.dylanw.net
 mariadb_admin_user: sqladm

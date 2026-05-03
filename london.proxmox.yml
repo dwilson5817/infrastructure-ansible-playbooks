@@ -1,5 +1,7 @@
 plugin: community.proxmox.proxmox
 
+# Usually, engine_mount_point is not needed since it's defined in group_vars/all.yml as
+# ansible_hashi_vault_engine_mount_point but group_vars aren't available in an inventory file.
 url: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret']['url'] }}"
 user: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret']['user'] }}"
 password: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials', engine_mount_point='secrets/infrastructure/ansible-playbooks')['secret']['password'] }}"
