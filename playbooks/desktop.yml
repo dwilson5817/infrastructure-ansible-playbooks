@@ -117,7 +117,7 @@
       ansible.builtin.copy:
         content: |
           [client]
-          host={{ maraidb_admin_host }}
+          host={{ mariadb_admin_host }}
           user={{ mariadb_admin_user }}
           password='{{ mariadb_admin_password }}'
         dest: /home/dylan/.my.cnf
