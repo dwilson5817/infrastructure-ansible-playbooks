@@ -469,6 +469,7 @@
             token_url: https://auth.dylanw.net/api/oidc/token
             scopes: openid profile email
             auto_login: yes
+            use_pkce: yes
             # All users get 'Viewer' access
             role_attribute_path: "'Viewer'"
             skip_org_role_sync: no
