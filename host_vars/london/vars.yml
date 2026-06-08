@@ -19,7 +19,7 @@ nfs_mounts:
 
 backups_aws_enabled: false
 
-rsync_net_retention_days: 3
+rsync_net_retention_days: 1
 
 rsync_net_backup_jobs:
   proxmox_daily:
