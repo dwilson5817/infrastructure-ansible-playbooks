@@ -227,7 +227,7 @@ proxmox_vms:
   desktop01:
     id: 111
     host: "{{ proxmox_host }}"
-    size: "{{ vm_sizes.large }}"
+    size: "{{ vm_sizes.extra_large }}"
     mac_address: 02:00:00:ae:c9:b9
     bridge: vmbr0
     ipv4:
