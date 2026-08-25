@@ -43,3 +43,6 @@
       - "{{ nameless_core_version | replace('.', '') }}.zip"
       - "Nameless-Lithium-{{ nameless_lithium_version }}.zip"
       - "Nameless-Tebex-{{ nameless_tebex_version }}.zip"
+
+- name: Configure Pelican
+  ansible.builtin.include_tasks: pelican.yml

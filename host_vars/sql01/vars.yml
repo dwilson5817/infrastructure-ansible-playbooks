@@ -13,6 +13,8 @@ mariadb_passwords: "{{ vault_mariadb_passwords }}"
 mariadb_users:
 - name: antrim
   host: web01.london.dylanw.net
+- name: dylanw
+  host: web01.london.dylanw.net
 - name: miners
   host: web01.london.dylanw.net
 - name: miners

@@ -1,11 +1,16 @@
 ---
 
-- name: Create Wings configuration directory
+- name: Create Pterodactyl Wings configuration directory
   ansible.builtin.file:
     path: /etc/pterodactyl
     state: directory
 
-- name: Write Wings configuration if it doesn't already exist
+- name: Create Pelican Wings configuration directory
+  ansible.builtin.file:
+    path: /etc/pelican
+    state: directory
+
+- name: Write Pterodactyl Wings configuration if it doesn't already exist
   ansible.builtin.copy:
     content: |+
       debug: false
@@ -29,13 +34,43 @@
     dest: /etc/pterodactyl/config.yml
     force: no
 
-- name: Download latest Wings binary
+- name: Write Pelican Wings configuration if it doesn't already exist
+  ansible.builtin.copy:
+    content: |+
+      debug: false
+      uuid: {{ pelican_wings_uuid }}
+      token_id: {{ pelican_wings_token_id }}
+      token: {{ pelican_wings_token }}
+      api:
+        host: 0.0.0.0
+        port: 8090
+        ssl:
+          enabled: true
+          cert: /etc/letsencrypt/certs/{{ ansible_fqdn }}/fullchain.pem
+          key: /etc/letsencrypt/keys/{{ ansible_fqdn }}.pem
+        upload_limit: 256.0
+      system:
+        data: /var/lib/pelican/volumes
+        sftp:
+          bind_port: 2023
+      allowed_mounts: []
+      remote: 'https://pelican.dylanw.net'
+    dest: /etc/pelican/config.yml
+    force: no
+
+- name: Download latest Pterodactyl Wings binary
   ansible.builtin.get_url:
     url: https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_amd64
     dest: /usr/local/bin/wings
     mode: u+x
 
-- name: Create Wings service file
+- name: Download latest Pelican Wings binary
+  ansible.builtin.get_url:
+    url: https://github.com/pelican/wings/releases/latest/download/wings_linux_amd64
+    dest: /usr/local/bin/pelican_wings
+    mode: u+x
+
+- name: Create Pterodactyl Wings service file
   ansible.builtin.copy:
     content: |
       [Unit]
@@ -59,11 +94,42 @@
       WantedBy=multi-user.target
     dest: /etc/systemd/system/wings.service
 
+- name: Create Pelican Wings service file
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Pelican Wings Daemon
+      After=docker.service
+      Requires=docker.service
+      PartOf=docker.service
+
+      [Service]
+      User=root
+      WorkingDirectory=/etc/pelican
+      LimitNOFILE=4096
+      PIDFile=/var/run/pelican_wings/daemon.pid
+      ExecStart=/usr/local/bin/pelican_wings
+      Restart=on-failure
+      StartLimitInterval=180
+      StartLimitBurst=30
+      RestartSec=5s
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/pelican-wings.service
+
 # This should be idempotent, but the general playbook already issues the same TLS certificate so it's not possible to
 # have a handler notify on change (because by the time this playbook runs it should always have an up-to-date TLS cert)
 # so for now we always restart as restarting Wings does not bounce the containers so should be safe.
-- name: Enable Wings on boot and restart it to pick up new binary and configuration
+- name: Enable Pterodactyl Wings on boot and restart it to pick up new binary and configuration
   ansible.builtin.systemd_service:
     name: wings
+    state: restarted
+    enabled: true
+
+# Same as above
+- name: Enable Pelican Wings on boot and restart it to pick up new binary and configuration
+  ansible.builtin.systemd_service:
+    name: pelican-wings
     state: restarted
     enabled: true

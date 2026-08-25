@@ -1,10 +1,15 @@
 ---
 
 vault_wings_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'game/wings/' + inventory_hostname_short)['secret'] }}"
+vault_pelican_wings_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pelican/wings/' + ansible_fqdn)['secret'] }}"
 
 wings_uuid: "{{ vault_wings_config['uuid'] }}"
 wings_token_id: "{{ vault_wings_config['token_id'] }}"
 wings_token: "{{ vault_wings_config['token'] }}"
+
+pelican_wings_uuid: "{{ vault_pelican_wings_config['uuid'] }}"
+pelican_wings_token_id: "{{ vault_pelican_wings_config['token_id'] }}"
+pelican_wings_token: "{{ vault_pelican_wings_config['token'] }}"
 
 rsync_net_backup_jobs:
   pterodactyl_daily:

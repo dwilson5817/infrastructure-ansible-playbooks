@@ -7,6 +7,8 @@ vault_nameless_email: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/nam
 dns_records:
   - zone: dylanw.net
     record: auth.dylanw.net
+  - zone: dylanw.net
+    record: pelican.dylanw.net
   - zone: minersrealm.net
     record: minersrealm.net
   - zone: minersrealm.net
@@ -19,6 +21,7 @@ web_certs:
     cloudflare_zone: dylanw.net
     alternative_domains:
     - auth.dylanw.net
+    - pelican.dylanw.net
     - www.dylanw.net
   minersrealm.net:
     cloudflare_zone: minersrealm.net
