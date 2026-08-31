@@ -12,7 +12,7 @@
     cloud_init_config:
       hostname: "{{ item.name }}"
       manage_etc_hosts: true
-      fqdn: "{{ item.name }}.{{ item.props.host }}.{{ domain }}"
+      fqdn: "{{ item.name }}.{{ item.props.host }}.{{ net_domain }}"
       user: ansible
       ssh_authorized_keys:
         - "{{ proxmox_ssh_keys }}"
@@ -85,7 +85,7 @@
     description: |
       {{ item.name }} is an Ansible-managed server!
 
-      Hostname: **{{ item.name }}.{{ item.props.host }}.{{ domain }}**.
+      Hostname: **{{ item.name }}.{{ item.props.host }}.{{ net_domain }}**.
 
       Created: **{{ '%b %d %Y %H:%M:%S' | strftime(ansible_date_time.epoch) }}**.
 

@@ -1,8 +1,35 @@
+vault_gitlab_config_smtp: "{{ lookup('community.hashi_vault.vault_kv2_get', 'gitlab/config/smtp')['secret'] }}"
+vault_gitlab_config_email: "{{ lookup('community.hashi_vault.vault_kv2_get', 'gitlab/config/email')['secret'] }}"
+vault_pocket_id_clients_gitlab: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pocket-id/clients/gitlab')['secret'] }}"
+
+gitlab_version: gitlab-ee=19.3.1-ee.0
+
+gitlab_config_smtp_enable: "{{ vault_gitlab_config_smtp['enable'] }}"
+gitlab_config_smtp_address: "{{ vault_gitlab_config_smtp['host'] }}"
+gitlab_config_smtp_port: "{{ vault_gitlab_config_smtp['port'] }}"
+gitlab_config_smtp_username: "{{ vault_gitlab_config_smtp['username'] }}"
+gitlab_config_smtp_password: "{{ vault_gitlab_config_smtp['password'] }}"
+gitlab_config_smtp_tls: "{{ vault_gitlab_config_smtp['tls'] }}"
+gitlab_config_email_from: "{{ vault_gitlab_config_email['from'] }}"
+gitlab_config_external_url: "https://{{ gitlab_domain }}"
+gitlab_config_nginx_listen_addresses:
+  - "{{ gitlab_ipv4 }}"
+  - "[{{ gitlab_ipv6 }}]"
+gitlab_config_pages_external_url: "https://{{ pages_domain }}"
+gitlab_config_pages_external_http:
+  - "{{ pages_ipv4 }}:80"
+  - "[{{ pages_ipv6 }}]:80"
+gitlab_config_pages_external_https:
+  - "{{ pages_ipv4 }}:443"
+  - "[{{ pages_ipv6 }}]:443"
+gitlab_config_pages_cert: "/etc/letsencrypt/certs/{{ pages_domain }}/fullchain.pem"
+gitlab_config_pages_cert_key: "/etc/letsencrypt/keys/{{ pages_domain }}.pem"
+gitlab_config_pages_external_redirect_http: "true"
+gitlab_config_pages_external_nginx_enable: "false"
+
 backups_jobs:
   gitlab_daily:
     hour: "02"
     minute: "00"
     local_dir: "/var/opt/gitlab/backups"
     command: "/opt/gitlab/bin/gitlab-backup create CRON=1"
-
-gitlab_version: gitlab-ee=19.3.1-ee.0

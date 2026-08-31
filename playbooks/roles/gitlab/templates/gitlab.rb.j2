@@ -29,7 +29,7 @@
 ##! On AWS EC2 instances, we also attempt to fetch the public hostname/IP
 ##! address from AWS. For more details, see:
 ##! https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
-external_url '{{ gitlab_config.external_url }}'
+external_url '{{ gitlab_config_external_url }}'
 
 ## Roles for multi-instance GitLab
 ##! The default is to have no roles enabled, which results in GitLab running as an all-in-one instance.
@@ -97,15 +97,15 @@ external_url '{{ gitlab_config.external_url }}'
 ###! Docs: https://docs.gitlab.com/omnibus/settings/smtp.html
 ###! **Use smtp instead of sendmail/postfix.**
 
-gitlab_rails['smtp_enable'] = {{ gitlab_config.smtp.enable }}
-gitlab_rails['smtp_address'] = "{{ gitlab_config.smtp.address }}"
-gitlab_rails['smtp_port'] = {{ gitlab_config.smtp.port }}
-gitlab_rails['smtp_user_name'] = "{{ gitlab_config.smtp.user_name }}"
-gitlab_rails['smtp_password'] = "{{ gitlab_config.smtp.password }}"
+gitlab_rails['smtp_enable'] = {{ gitlab_config_smtp_enable }}
+gitlab_rails['smtp_address'] = "{{ gitlab_config_smtp_host }}"
+gitlab_rails['smtp_port'] = {{ gitlab_config_smtp_port }}
+gitlab_rails['smtp_user_name'] = "{{ gitlab_config_smtp_username }}"
+gitlab_rails['smtp_password'] = "{{ gitlab_config_smtp_password }}"
 # gitlab_rails['smtp_domain'] = "example.com"
 # gitlab_rails['smtp_authentication'] = "login"
 # gitlab_rails['smtp_enable_starttls_auto'] = true
-gitlab_rails['smtp_tls'] = {{ gitlab_config.smtp.tls }}
+gitlab_rails['smtp_tls'] = {{ gitlab_config_smtp_tls }}
 # gitlab_rails['smtp_pool'] = false
 
 ###! **Can be: 'none', 'peer', 'client_once', 'fail_if_no_peer_cert'**
@@ -121,7 +121,7 @@ gitlab_rails['smtp_tls'] = {{ gitlab_config.smtp.tls }}
 
 ###! If your SMTP server does not like the default 'From: gitlab@gitlab.example.com'
 ###! can change the 'From' with this setting.
-gitlab_rails['gitlab_email_from'] = '{{ gitlab_config.email_from }}'
+gitlab_rails['gitlab_email_from'] = '{{ gitlab_config_email_from }}'
 # gitlab_rails['gitlab_email_display_name'] = 'Example'
 # gitlab_rails['gitlab_email_reply_to'] = 'noreply@example.com'
 # gitlab_rails['gitlab_email_subject_suffix'] = ''
@@ -1870,7 +1870,7 @@ gitlab_rails['backup_keep_time'] = 259200
 
 # nginx['ssl_dhparam'] = nil # Path to dhparams.pem, eg. /etc/gitlab/ssl/dhparams.pem
 # nginx['ssl_password_file'] = nil # Path to file with passphrases for ssl certificate secret keys
-nginx['listen_addresses'] = ['{{ gitlab_config.nginx.listen_addresses | join("', '") }}']
+nginx['listen_addresses'] = ['{{ gitlab_config_nginx_listen_addresses | join("', '") }}']
 
 ##! **Defaults to forcing web browsers to always communicate using only HTTPS**
 ##! Docs: https://docs.gitlab.com/omnibus/settings/ssl/#configure-the-http-strict-transport-security-hsts
@@ -2044,21 +2044,21 @@ nginx['listen_addresses'] = ['{{ gitlab_config.nginx.listen_addresses | join("',
 ################################################################################
 
 ##! Define to enable GitLab Pages
-pages_external_url "{{ gitlab_config.pages.external_url }}"
+pages_external_url "{{ gitlab_config_pages_external_url }}"
 # gitlab_pages['enable'] = false
 
 ##! Configure to expose GitLab Pages on external IP address, serving the HTTP
-gitlab_pages['external_http'] = ['{{ gitlab_config.pages.external_http | join("', '") }}']
+gitlab_pages['external_http'] = ['{{ gitlab_config_pages_external_http | join("', '") }}']
 
 ##! Configure to expose GitLab Pages on external IP address, serving the HTTPS
-gitlab_pages['external_https'] = ['{{ gitlab_config.pages.external_https | join("', '") }}']
+gitlab_pages['external_https'] = ['{{ gitlab_config_pages_external_https | join("', '") }}']
 
 ##! Configure to expose GitLab Pages on external IP address, serving the HTTPS over PROXYv2
 # gitlab_pages['external_https_proxyv2'] = []
 
 ##! Configure cert when using external IP address
-gitlab_pages['cert'] = "{{ gitlab_config.pages.cert }}"
-gitlab_pages['cert_key'] = "{{ gitlab_config.pages.cert_key }}"
+gitlab_pages['cert'] = "{{ gitlab_config_pages_cert }}"
+gitlab_pages['cert_key'] = "{{ gitlab_config_pages_cert_key }}"
 
 ##! Configure to use the default list of cipher suites
 # gitlab_pages['insecure_ciphers'] = false
@@ -2242,7 +2242,7 @@ gitlab_pages['cert_key'] = "{{ gitlab_config.pages.cert_key }}"
 ##! `pages_nginx['some_setting']` and should be set separately.
 
 ##! Below you can find settings that are exclusive to "GitLab Pages NGINX"
-pages_nginx['enable'] = {{ gitlab_config.pages.nginx_enable }}
+pages_nginx['enable'] = {{ gitlab_config_pages_nginx_enable }}
 
 # gitlab_rails['pages_path'] = "/var/opt/gitlab/gitlab-rails/shared/pages"
 

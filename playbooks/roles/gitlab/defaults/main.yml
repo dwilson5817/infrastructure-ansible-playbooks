@@ -1,0 +1,8 @@
+gitlab_config_smtp_enable: "true"
+gitlab_config_smtp_address: "smtp.server"
+gitlab_config_smtp_port: "465"
+gitlab_config_smtp_user_name: "smtp user"
+gitlab_config_smtp_password: "smtp password"
+gitlab_config_smtp_tls: "false"
+
+gitlab_config_email_from: "example@example.com"
