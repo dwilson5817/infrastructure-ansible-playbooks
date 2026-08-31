@@ -6,7 +6,8 @@
 # taking the archive step with it.
 #
 # Destinations offset themselves from this job's minute: Hetzner at +15, AWS at
-# +30, rsync.net at +45.
+# +30.  Those offsets do not carry into the next hour, so job minutes should
+# stay below 30.
 - name: Create cron jobs to prepare backup archives
   ansible.builtin.cron:
     name: "Backup prepare job: {{ item.key }}"
