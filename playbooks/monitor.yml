@@ -425,12 +425,12 @@
       alertmanager_receivers:
         - name: gitlab
           webhook_configs:
-            - url: "{{ vault_prometheus_webhooks_gitlab['url'] }}"
+            - url: "{{ prometheus_webhooks_gitlab_url }}"
               send_resolved: true
               http_config:
                 authorization:
                   type: Bearer
-                  credentials: "{{ vault_prometheus_webhooks_gitlab['auth_key'] }}"
+                  credentials: "{{ prometheus_webhooks_gitlab_auth_key }}"
       alertmanager_route:
         group_by:
           - instance
