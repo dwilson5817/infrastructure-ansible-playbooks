@@ -67,16 +67,18 @@
 - name: Ensure remote backup directories exist on rsync.net
   ansible.builtin.shell: |
     ssh rsync_net "mkdir -p backups/{{ inventory_hostname }}/{{ item.key }}"
-  loop: "{{ rsync_net_backup_jobs | dict2items }}"
+  loop: "{{ backups_jobs | dict2items }}"
   changed_when: false
 
+# The archive itself is created by prepare.yml so that this destination can be
+# retired without taking the archive step with it.  Offset by 45 minutes to stay
+# clear of prepare (+0), Hetzner (+15) and AWS (+30).
 - name: Create cron jobs for daily backups
   ansible.builtin.cron:
     name: "Backup job: {{ item.key }}"
-    minute: "{{ item.value.minute | default('0') }}"
+    minute: "{{ (item.value.minute | default('0') | int + 45) % 60 }}"
     hour: "{{ item.value.hour | default('2') }}"
     job: >
-      {% if item.value.command is defined and item.value.command %}{{ item.value.command }} && {% endif %}
       rsync -avz {{ item.value.local_dir }}/ rsync_net:backups/{{ inventory_hostname }}/{{ item.key }}/ &&
       ssh rsync_net "find backups/{{ inventory_hostname }}/{{ item.key }} -mindepth 1 -maxdepth 1 -mtime +{{ rsync_net_retention_days }} -exec rm -rf {} \+"
-  loop: "{{ rsync_net_backup_jobs | dict2items }}"
+  loop: "{{ backups_jobs | dict2items }}"

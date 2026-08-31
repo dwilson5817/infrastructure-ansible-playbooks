@@ -5,3 +5,16 @@ aws_roles_anywhere_dir: "/etc/certs/aws-roles-anywhere"
 aws_roles_anywhere_cert: "{{ aws_roles_anywhere_dir }}/certificate.crt"
 aws_roles_anywhere_key: "{{ aws_roles_anywhere_dir }}/private.key"
 aws_roles_anywhere_chain: "{{ aws_roles_anywhere_dir }}/chain.pem"
+
+hetzner_ssh_alias: "hetzner"
+hetzner_ssh_port: 23
+hetzner_ssh_key: "/root/.ssh/id_ed25519_hetzner"
+
+hetzner_subaccount_name: "{{ inventory_hostname }}"
+hetzner_home_directory: "Backups/{{ inventory_hostname }}"
+
+hetzner_subaccount_password_length: 64
+hetzner_subaccount_password_special: "-_=+."
+
+hetzner_dns_retries: 30
+hetzner_dns_delay: 10

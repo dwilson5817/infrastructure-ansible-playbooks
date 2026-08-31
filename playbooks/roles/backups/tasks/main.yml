@@ -5,9 +5,21 @@
     name: cron
     state: present
 
+- name: Create cron jobs to prepare backup archives
+  ansible.builtin.include_tasks: prepare.yml
+
 - name: Configure backups to AWS
   ansible.builtin.include_tasks: aws.yml
   when: backups_aws_enabled | default(true) | bool
 
 - name: Configure backups to rsync.net
   ansible.builtin.include_tasks: rsync_net.yml
+  when: backups_rsync_net_enabled | default(true) | bool
+
+- name: Remove backups to rsync.net
+  ansible.builtin.include_tasks: rsync_net_remove.yml
+  when: not (backups_rsync_net_enabled | default(true) | bool)
+
+- name: Configure backups to the Hetzner Storage Box
+  ansible.builtin.include_tasks: hetzner.yml
+  when: backups_hetzner_enabled | default(true) | bool

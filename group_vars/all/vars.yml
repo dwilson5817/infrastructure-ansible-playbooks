@@ -7,6 +7,7 @@ vault_ansible: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/ansible')[
 vault_cloudflare: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/cloudflare')['secret'] }}"
 vault_prometheus_exporters_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/exporters/users')['secret'] }}"
 vault_rsync_net: "{{ lookup('community.hashi_vault.vault_kv2_get', 'all/rsync_net')['secret'] }}"
+vault_hetzner: "{{ lookup('community.hashi_vault.vault_kv2_get', 'hetzner/storage-box')['secret'] }}"
 
 ansible_ssh_user: "{{ vault_ansible['ssh_user'] }}"
 
@@ -29,6 +30,9 @@ rsync_net_host: "{{ vault_rsync_net['host'] }}"
 rsync_net_private_key: "{{ vault_rsync_net['private_key'] }}"
 rsync_net_public_key: "{{ vault_rsync_net['public_key'] }}"
 rsync_net_retention_days: 7
+
+hetzner_api_token: "{{ vault_hetzner['api_token'] }}"
+hetzner_storage_box: "{{ vault_hetzner['storage_box'] }}"
 
 vault_aws_roles_anywhere: "{{ lookup('community.hashi_vault.vault_kv2_get', 'aws/roles-anywhere/backups/' + ansible_fqdn, errors='ignore')['secret'] | default(omit, true) }}"
 

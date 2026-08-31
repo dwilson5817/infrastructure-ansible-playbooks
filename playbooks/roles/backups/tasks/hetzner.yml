@@ -1,0 +1,158 @@
+---
+
+# The subaccount is identified by its name, which makes this task idempotent: on
+# every run after the first the existing subaccount is looked up rather than a
+# new one being created.  The API token can manage every Storage Box in the
+# project, so this runs on the controller and is never shipped to the host.
+- name: Create Storage Box subaccount for this host
+  hetzner.hcloud.storage_box_subaccount:
+    api_token: "{{ hetzner_api_token }}"
+    storage_box: "{{ hetzner_storage_box }}"
+    name: "{{ hetzner_subaccount_name }}"
+    home_directory: "{{ hetzner_home_directory }}"
+    description: "Backups for {{ inventory_hostname }} (managed by Ansible)"
+    # Only consumed when the subaccount is created, ignored on later runs.  The
+    # bootstrap block below resets it if key based access is not yet working.
+    password: "{{ lookup('community.general.random_string', length=hetzner_subaccount_password_length, override_special=hetzner_subaccount_password_special, min_lower=1, min_upper=1, min_numeric=1, min_special=1) }}"
+    access_settings:
+      ssh_enabled: true
+      reachable_externally: true
+      samba_enabled: false
+      webdav_enabled: false
+      readonly: false
+    labels:
+      managed-by: ansible
+      host: "{{ inventory_hostname }}"
+    state: present
+  delegate_to: localhost
+  no_log: true
+  become: no
+  register: hetzner_subaccount
+
+# The DNS record for a newly created subaccount does not exist yet when the API
+# call returns, and until it appears every ssh and rsync to the box fails to
+# resolve.  Waiting here rather than retrying the ssh itself keeps the failure
+# legible when something other than propagation is wrong.
+- name: Wait for the subaccount hostname to resolve
+  ansible.builtin.command:
+    cmd: "getent hosts {{ hetzner_subaccount.hcloud_storage_box_subaccount.server }}"
+  register: hetzner_dns
+  until: hetzner_dns.rc == 0
+  retries: "{{ hetzner_dns_retries }}"
+  delay: "{{ hetzner_dns_delay }}"
+  changed_when: false
+
+- name: Ensure SSH directory exists for the root user
+  ansible.builtin.file:
+    path: /root/.ssh
+    state: directory
+    mode: '0700'
+
+- name: Generate SSH key for Hetzner Storage Box backups
+  community.crypto.openssh_keypair:
+    path: "{{ hetzner_ssh_key }}"
+    type: ed25519
+    comment: "backup-key-{{ inventory_hostname }}"
+
+- name: Create SSH config entry for the Hetzner Storage Box
+  ansible.builtin.blockinfile:
+    path: /root/.ssh/config
+    create: yes
+    mode: '0600'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: HETZNER"
+    block: |
+      Host {{ hetzner_ssh_alias }}
+          HostName {{ hetzner_subaccount.hcloud_storage_box_subaccount.server }}
+          User {{ hetzner_subaccount.hcloud_storage_box_subaccount.username }}
+          Port {{ hetzner_ssh_port }}
+          IdentityFile {{ hetzner_ssh_key }}
+          IdentitiesOnly yes
+          BatchMode yes
+          StrictHostKeyChecking accept-new
+
+- name: Read the public key
+  ansible.builtin.slurp:
+    src: "{{ hetzner_ssh_key }}.pub"
+  register: hetzner_pubkey
+
+# Storage Boxes have no full shell, but a restricted command set is available on
+# port 23.  "ls" is part of it and is enough to prove key based access works.
+- name: Check if the host key is already authorized on the Storage Box
+  ansible.builtin.command:
+    cmd: "ssh -o BatchMode=yes -o ConnectTimeout=10 {{ hetzner_ssh_alias }} ls"
+  register: hetzner_ssh_test
+  failed_when: false
+  changed_when: false
+
+- name: Install the host key on the Storage Box using a temporary password
+  when: hetzner_ssh_test.rc != 0
+  block:
+    # Password authentication cannot be disabled on a Storage Box, so rather
+    # than trying to keep the password from creation alive we mint a fresh one
+    # here.  This keeps the bootstrap self healing: if a previous run failed
+    # part way through, the next run simply resets the password and retries.
+    - name: Generate a temporary password for the subaccount
+      ansible.builtin.set_fact:
+        hetzner_bootstrap_password: "{{ lookup('community.general.random_string', length=hetzner_subaccount_password_length, override_special=hetzner_subaccount_password_special, min_lower=1, min_upper=1, min_numeric=1, min_special=1) }}"
+      no_log: true
+
+    - name: Reset the subaccount password
+      hetzner.hcloud.storage_box_subaccount:
+        api_token: "{{ hetzner_api_token }}"
+        storage_box: "{{ hetzner_storage_box }}"
+        name: "{{ hetzner_subaccount_name }}"
+        password: "{{ hetzner_bootstrap_password }}"
+        state: reset_password
+      delegate_to: localhost
+      no_log: true
+      become: no
+
+    - name: Ensure sshpass is installed
+      ansible.builtin.package:
+        name: sshpass
+        state: present
+
+    # The password is passed through the environment so that it never appears in
+    # the process list, and the public key through stdin because the Storage Box
+    # does not support pipes or redirects on its end.
+    - name: Append the host public key to the Storage Box
+      ansible.builtin.command:
+        cmd: >
+          sshpass -e
+          ssh -p {{ hetzner_ssh_port }}
+          -o StrictHostKeyChecking=accept-new
+          -o PreferredAuthentications=password
+          -o PubkeyAuthentication=no
+          {{ hetzner_subaccount.hcloud_storage_box_subaccount.username }}@{{ hetzner_subaccount.hcloud_storage_box_subaccount.server }}
+          install-ssh-key
+        stdin: "{{ hetzner_pubkey['content'] | b64decode }}"
+      environment:
+        SSHPASS: "{{ hetzner_bootstrap_password }}"
+#      no_log: true
+
+    - name: Verify key based access to the Storage Box
+      ansible.builtin.command:
+        cmd: "ssh -o BatchMode=yes -o ConnectTimeout=10 {{ hetzner_ssh_alias }} ls"
+      changed_when: false
+
+- name: Ensure cron and rsync are installed
+  ansible.builtin.package:
+    name:
+      - cron
+      - rsync
+    state: present
+
+# The subaccount is chrooted to its home directory, so job paths are relative to
+# it rather than repeating Backups/{{ inventory_hostname }}.  Retention is not
+# handled here: "find" is not part of the Storage Box command set, and deletion
+# driven from the host would let a compromised host destroy its own backups.
+# History comes from Storage Box snapshots, which the subaccount cannot reach.
+- name: Create cron jobs for daily backups to the Storage Box
+  ansible.builtin.cron:
+    name: "Hetzner backup job: {{ item.key }}"
+    minute: "{{ (item.value.minute | default('0') | int + 15) % 60 }}"
+    hour: "{{ item.value.hour | default('2') }}"
+    job: >
+      rsync -az --delete --mkpath
+      {{ item.value.local_dir }}/ {{ hetzner_ssh_alias }}:{{ item.key }}/
+  loop: "{{ backups_jobs | dict2items }}"

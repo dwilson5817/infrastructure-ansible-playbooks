@@ -1,0 +1,17 @@
+---
+
+# The archives that the destination jobs ship are created here rather than by
+# whichever destination happens to run first.  Every destination then only
+# reads from local_dir, so any one of them can be retired on its own without
+# taking the archive step with it.
+#
+# Destinations offset themselves from this job's minute: Hetzner at +15, AWS at
+# +30, rsync.net at +45.
+- name: Create cron jobs to prepare backup archives
+  ansible.builtin.cron:
+    name: "Backup prepare job: {{ item.key }}"
+    minute: "{{ item.value.minute | default('0') }}"
+    hour: "{{ item.value.hour | default('2') }}"
+    job: "{{ item.value.command }}"
+  loop: "{{ backups_jobs | dict2items }}"
+  when: item.value.command is defined and item.value.command

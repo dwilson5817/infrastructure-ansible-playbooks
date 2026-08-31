@@ -18,6 +18,10 @@ collections:
     version: 1.5.0
   - name: grafana.grafana
     version: 6.0.6
+  - name: hetzner.hcloud
+    # 6.9.0 is the first release with the storage_box_* modules.  7.0.0 requires
+    # ansible-core >= 2.19, so stay on the 6.x line.
+    version: 6.12.0
   - name: prometheus.prometheus
     version: 0.27.5
 

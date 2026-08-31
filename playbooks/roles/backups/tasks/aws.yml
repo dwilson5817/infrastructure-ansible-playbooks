@@ -39,4 +39,4 @@
       --storage-class DEEP_ARCHIVE
       --profile backups-profile
       --only-show-errors
-  loop: "{{ rsync_net_backup_jobs | dict2items }}"
+  loop: "{{ backups_jobs | dict2items }}"

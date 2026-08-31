@@ -12,6 +12,10 @@ proxmoxer==2.2.0
 boto3==1.42.19
 botocore==1.42.19
 
+## hetzner.hcloud
+# hcloud: Python client for the Hetzner Cloud API
+hcloud==2.19.0
+
 ## community.hashi_vault
 # hvac: Python client for HashiCorp Vault
 hvac==2.4.0

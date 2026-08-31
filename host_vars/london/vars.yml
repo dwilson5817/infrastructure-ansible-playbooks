@@ -21,7 +21,7 @@ backups_aws_enabled: false
 
 rsync_net_retention_days: 1
 
-rsync_net_backup_jobs:
+backups_jobs:
   proxmox_daily:
     hour: "04"
     minute: "00"
