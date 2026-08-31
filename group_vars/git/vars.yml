@@ -8,7 +8,7 @@ gitlab_pages_domain: "pages.{{ dev_domain }}"
 gitlab_version: gitlab-ee=19.3.1-ee.0
 
 gitlab_config_smtp_enable: "{{ vault_gitlab_config_smtp['enable'] }}"
-gitlab_config_smtp_address: "{{ vault_gitlab_config_smtp['host'] }}"
+gitlab_config_smtp_host: "{{ vault_gitlab_config_smtp['host'] }}"
 gitlab_config_smtp_port: "{{ vault_gitlab_config_smtp['port'] }}"
 gitlab_config_smtp_username: "{{ vault_gitlab_config_smtp['username'] }}"
 gitlab_config_smtp_password: "{{ vault_gitlab_config_smtp['password'] }}"
