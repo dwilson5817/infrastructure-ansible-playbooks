@@ -10,27 +10,27 @@ pages_ipv4: 51.38.73.143
 pages_ipv6: 2001:41d0:800:3f6d:d23b:35f2:84ea:9e58
 
 dns_records:
-  - zone: "{{ base_domain }}"
+  - zone: "{{ dev_domain }}"
     record: "{{ gitlab_domain }}"
     type: A
     value: "{{ gitlab_ipv4 }}"
-  - zone: "{{ base_domain }}"
+  - zone: "{{ dev_domain }}"
     record: "{{ gitlab_domain }}"
     type: AAAA
     value: "{{ gitlab_ipv6 }}"
-  - zone: "{{ base_domain }}"
+  - zone: "{{ dev_domain }}"
     record: "{{ pages_domain }}"
     type: A
     value: "{{ pages_ipv4 }}"
-  - zone: "{{ base_domain }}"
+  - zone: "{{ dev_domain }}"
     record: "{{ pages_domain }}"
     type: AAAA
     value: "{{ pages_ipv6 }}"
-  - zone: "{{ base_domain }}"
+  - zone: "{{ dev_domain }}"
     record: "*.{{ pages_domain }}"
     type: A
     value: "{{ pages_ipv4 }}"
-  - zone: "{{ base_domain }}"
+  - zone: "{{ dev_domain }}"
     record: "*.{{ pages_domain }}"
     type: AAAA
     value: "{{ pages_ipv6 }}"
