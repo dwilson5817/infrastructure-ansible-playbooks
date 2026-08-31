@@ -1,5 +1,5 @@
 ---
 
-gitlab_runner_tokens: "{{ lookup('community.hashi_vault.vault_kv2_get', 'runner/runner-tokens')['secret'] }}"
+vault_gitlab_runner_token: "{{ lookup('community.hashi_vault.vault_kv2_get', 'gitlab/runner/' + ansible_fqdn)['secret'] }}"
 
-gitlab_runner_token: "{{ gitlab_runner_tokens[inventory_hostname_short] }}"
+gitlab_runner_token: "{{ vault_gitlab_runner_token['token'] }}"
