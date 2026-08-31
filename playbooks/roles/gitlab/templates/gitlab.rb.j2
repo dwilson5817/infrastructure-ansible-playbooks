@@ -644,8 +644,8 @@ gitlab_rails['omniauth_providers'] = [
       send_scope_to_token_endpoint: "false",
       pkce: true,
       client_options: {
-        identifier: "{{ gitlab_openid_connect_client_id }}",
-        secret: "{{ gitlab_openid_connect_client_secret }}",
+        identifier: "{{ gitlab_config_omniauth_providers_openid_connect_client_id }}",
+        secret: "{{ gitlab_config_omniauth_providers_openid_connect_client_secret }}",
         redirect_uri: "https://gitlab.dylanw.dev/users/auth/openid_connect/callback"
       }
     }

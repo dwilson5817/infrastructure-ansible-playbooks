@@ -1,9 +1,3 @@
-gitlab_openid_connect_client_id: "{{ vault_pocket_id_clients_gitlab['client_id'] }}"
-gitlab_openid_connect_client_secret: "{{ vault_pocket_id_clients_gitlab['client_secret'] }}"
-
-gitlab_domain: "gitlab.{{ dev_domain }}"
-pages_domain: "pages.{{ dev_domain }}"
-
 gitlab_ipv4: 51.38.73.132
 gitlab_ipv6: 2001:41d0:800:3f6d:bf01:36f9:3b98:e390
 pages_ipv4: 51.38.73.143
@@ -19,18 +13,18 @@ dns_records:
     type: AAAA
     value: "{{ gitlab_ipv6 }}"
   - zone: "{{ dev_domain }}"
-    record: "{{ pages_domain }}"
+    record: "{{ gitlab_pages_domain }}"
     type: A
     value: "{{ pages_ipv4 }}"
   - zone: "{{ dev_domain }}"
-    record: "{{ pages_domain }}"
+    record: "{{ gitlab_pages_domain }}"
     type: AAAA
     value: "{{ pages_ipv6 }}"
   - zone: "{{ dev_domain }}"
-    record: "*.{{ pages_domain }}"
+    record: "*.{{ gitlab_pages_domain }}"
     type: A
     value: "{{ pages_ipv4 }}"
   - zone: "{{ dev_domain }}"
-    record: "*.{{ pages_domain }}"
+    record: "*.{{ gitlab_pages_domain }}"
     type: AAAA
     value: "{{ pages_ipv6 }}"
