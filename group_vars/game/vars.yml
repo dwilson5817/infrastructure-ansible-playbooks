@@ -1,6 +1,6 @@
 ---
 
-vault_wings_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'game/wings/' + inventory_hostname_short)['secret'] }}"
+vault_wings_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pterodactyl/wings/' + ansible_fqdn)['secret'] }}"
 vault_pelican_wings_config: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pelican/wings/' + ansible_fqdn)['secret'] }}"
 
 wings_uuid: "{{ vault_wings_config['uuid'] }}"
