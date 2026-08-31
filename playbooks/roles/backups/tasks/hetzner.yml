@@ -128,7 +128,7 @@
         stdin: "{{ hetzner_pubkey['content'] | b64decode }}"
       environment:
         SSHPASS: "{{ hetzner_bootstrap_password }}"
-#      no_log: true
+      no_log: true
 
     - name: Verify key based access to the Storage Box
       ansible.builtin.command:
