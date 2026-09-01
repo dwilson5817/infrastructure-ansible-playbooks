@@ -18,6 +18,7 @@ gitlab_config_external_url: "https://{{ gitlab_domain }}"
 gitlab_config_nginx_listen_addresses:
   - "{{ gitlab_ipv4 }}"
   - "[{{ gitlab_ipv6 }}]"
+gitlab_config_pages_nginx_enable: "true"
 gitlab_config_pages_external_url: "https://{{ gitlab_pages_domain }}"
 gitlab_config_pages_external_http:
   - "{{ pages_ipv4 }}:80"
