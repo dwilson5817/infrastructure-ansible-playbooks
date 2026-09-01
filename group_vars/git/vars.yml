@@ -13,12 +13,15 @@ gitlab_config_smtp_port: "{{ vault_gitlab_config_smtp['port'] }}"
 gitlab_config_smtp_username: "{{ vault_gitlab_config_smtp['username'] }}"
 gitlab_config_smtp_password: "{{ vault_gitlab_config_smtp['password'] }}"
 gitlab_config_smtp_tls: "{{ vault_gitlab_config_smtp['tls'] }}"
+
 gitlab_config_email_from: "{{ vault_gitlab_config_email['from'] }}"
+
 gitlab_config_external_url: "https://{{ gitlab_domain }}"
+
 gitlab_config_nginx_listen_addresses:
   - "{{ gitlab_ipv4 }}"
   - "[{{ gitlab_ipv6 }}]"
-gitlab_config_pages_nginx_enable: "true"
+
 gitlab_config_pages_external_url: "https://{{ gitlab_pages_domain }}"
 gitlab_config_pages_external_http:
   - "{{ pages_ipv4 }}:80"
@@ -28,8 +31,8 @@ gitlab_config_pages_external_https:
   - "[{{ pages_ipv6 }}]:443"
 gitlab_config_pages_cert: "/etc/letsencrypt/certs/{{ gitlab_pages_domain }}/fullchain.pem"
 gitlab_config_pages_cert_key: "/etc/letsencrypt/keys/{{ gitlab_pages_domain }}.pem"
-gitlab_config_pages_external_redirect_http: "true"
-gitlab_config_pages_external_nginx_enable: "false"
+gitlab_config_pages_nginx_enable: "false"
+
 gitlab_config_omniauth_providers_openid_connect_client_id: "{{ vault_pocket_id_clients_gitlab['client_id'] }}"
 gitlab_config_omniauth_providers_openid_connect_client_secret: "{{ vault_pocket_id_clients_gitlab['client_secret'] }}"
 
