@@ -2,13 +2,13 @@
 
 - name: Create directory for Pocket ID
   ansible.builtin.file:
-    path: /srv/www/dylanw.net/auth
+    path: "/srv/www/{{ net_domain }}/auth"
     state: directory
 
 - name: Download Pocket ID docker-compose.yml
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/pocket-id/pocket-id/main/docker-compose.yml
-    dest: /srv/www/dylanw.net/auth/docker-compose.yml
+    dest: "/srv/www/{{ net_domain }}/auth/docker-compose.yml"
 
 - name: Write Pocket ID .env file
   ansible.builtin.copy:
@@ -33,8 +33,8 @@
       EMAIL_LOGIN_NOTIFICATION_ENABLED=true
       EMAIL_API_KEY_EXPIRATION_ENABLED=true
       EMAIL_VERIFICATION_ENABLED=true
-    dest: /srv/www/dylanw.net/auth/.env
+    dest: "/srv/www/{{ net_domain }}/auth/.env"
 
 - name: Bring Pocket ID up
   community.docker.docker_compose_v2:
-    project_src: /srv/www/dylanw.net/auth
+    project_src: "/srv/www/{{ net_domain }}/auth"

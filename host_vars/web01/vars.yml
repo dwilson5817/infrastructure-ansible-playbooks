@@ -5,10 +5,10 @@ vault_pterodactyl: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/pterod
 vault_nameless_email: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/nameless/email')['secret'] }}"
 
 dns_records:
-  - zone: dylanw.net
-    record: auth.dylanw.net
-  - zone: dylanw.net
-    record: pelican.dylanw.net
+  - zone: "{{ net_domain }}"
+    record: auth
+  - zone: "{{ net_domain }}"
+    record: pelican
   - zone: minersrealm.net
     record: minersrealm.net
   - zone: minersrealm.net
@@ -17,12 +17,12 @@ dns_records:
     record: panel.minersrealm.net
 
 web_certs:
-  dylanw.net:
-    cloudflare_zone: dylanw.net
+  "{{ net_domain }}":
+    cloudflare_zone: "{{ net_domain }}"
     alternative_domains:
-    - auth.dylanw.net
-    - pelican.dylanw.net
-    - www.dylanw.net
+    - "auth.{{ net_domain }}"
+    - "pelican.{{ net_domain }}"
+    - "www.{{ net_domain }}"
   minersrealm.net:
     cloudflare_zone: minersrealm.net
     alternative_domains:
@@ -35,7 +35,7 @@ nameless_tebex_version: 1.4.0
 
 nameless_config:
   db:
-    host: sql.dylanw.net
+    host: "sql.{{ net_domain }}"
     port: 3306
     user: miners
     password: "{{ vault_mariadb_passwords['miners'] }}"

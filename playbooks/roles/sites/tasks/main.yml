@@ -20,9 +20,9 @@
     group: ansible
   become: yes
 
-- name: Create directory for dylanw.net sites
+- name: "Create directory for {{ net_domain }} sites"
   ansible.builtin.file:
-    path: /srv/www/dylanw.net
+    path: "/srv/www/{{ net_domain }}"
     state: directory
 
 - name: Create directory for MinersRealm sites

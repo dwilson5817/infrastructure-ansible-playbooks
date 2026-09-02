@@ -2,6 +2,6 @@
 
 dns_records:
   - record: bluesky
-    zone: dylanw.dev
+    zone: "{{ dev_domain }}"
   - record: '*.bluesky'
-    zone: dylanw.dev
+    zone: "{{ dev_domain }}"

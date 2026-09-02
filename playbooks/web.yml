@@ -53,10 +53,10 @@
                         ssl: true
                       - port: 443
                         ssl: true
-                    server_name: auth.dylanw.net
+                    server_name: "auth.{{ net_domain }}"
                   ssl:
-                    certificate: "/etc/letsencrypt/certs/dylanw.net/fullchain.pem"
-                    certificate_key: "/etc/letsencrypt/keys/dylanw.net.pem"
+                    certificate: "/etc/letsencrypt/certs/{{ net_domain }}/fullchain.pem"
+                    certificate_key: "/etc/letsencrypt/keys/{{ net_domain }}.pem"
                     session_cache:
                       shared:
                         name: SSL
@@ -107,10 +107,10 @@
                         ssl: true
                       - port: 443
                         ssl: true
-                    server_name: pelican.dylanw.net
+                    server_name: "pelican.{{ net_domain }}"
                   ssl:
-                    certificate: "/etc/letsencrypt/certs/dylanw.net/fullchain.pem"
-                    certificate_key: "/etc/letsencrypt/keys/dylanw.net.pem"
+                    certificate: "/etc/letsencrypt/certs/{{ net_domain }}/fullchain.pem"
+                    certificate_key: "/etc/letsencrypt/keys/{{ net_domain }}.pem"
                     session_cache:
                       shared:
                         name: SSL

@@ -68,7 +68,7 @@
     - name: Create database user with all database privileges
       community.mysql.mysql_user:
         name: sqladm
-        host: desktop01.london.dylanw.net
+        host: "desktop01.london.{{ net_domain }}"
         password: "{{ mariadb_passwords.sqladm }}"
         priv: '*.*:ALL,GRANT'
         state: present

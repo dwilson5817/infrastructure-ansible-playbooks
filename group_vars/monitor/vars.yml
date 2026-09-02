@@ -4,13 +4,13 @@ vault_prometheus_users: "{{ lookup('community.hashi_vault.vault_kv2_get', 'prome
 vault_prometheus_webhooks_gitlab: "{{ lookup('community.hashi_vault.vault_kv2_get', 'prometheus/webhooks/gitlab')['secret'] }}"
 vault_pocket_id_clients_grafana: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pocket-id/clients/grafana')['secret'] }}"
 
-prometheus_zone: "dylanw.net"
-prometheus_hostname: "prometheus.dylanw.net"
+prometheus_zone: "{{ net_domain }}"
+prometheus_hostname: "prometheus.{{ net_domain }}"
 prometheus_webhooks_gitlab_url: "{{ vault_prometheus_webhooks_gitlab['url'] }}"
 prometheus_webhooks_gitlab_auth_key: "{{ vault_prometheus_webhooks_gitlab['auth_key'] }}"
 prometheus_basic_auth_users: "{{ vault_prometheus_users }}"
 
-grafana_zone: "dylanw.net"
-grafana_hostname: "monitoring.dylanw.net"
+grafana_zone: "{{ net_domain }}"
+grafana_hostname: "monitoring.{{ net_domain }}"
 grafana_generic_oauth_client_id: "{{ vault_pocket_id_clients_grafana['client_id'] }}"
 grafana_generic_oauth_client_secret: "{{ vault_pocket_id_clients_grafana['client_secret'] }}"

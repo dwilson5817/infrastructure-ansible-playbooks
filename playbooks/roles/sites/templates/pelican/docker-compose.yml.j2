@@ -14,7 +14,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
     environment:
       XDG_DATA_HOME: /pelican-data
-      APP_URL: "https://pelican.dylanw.net"
+      APP_URL: "https://pelican.{{ net_domain }}"
       BEHIND_PROXY: "true"
       TRUSTED_PROXIES: "172.30.0.0/16"
 

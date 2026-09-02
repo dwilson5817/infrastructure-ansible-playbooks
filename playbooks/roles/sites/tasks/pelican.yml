@@ -2,19 +2,19 @@
 
 - name: Create directory for Pelican
   ansible.builtin.file:
-    path: /srv/www/dylanw.net/pelican
+    path: "/srv/www/{{ net_domain }}/pelican"
     state: directory
 
 - name: Deploy Pelican Caddyfile
   ansible.builtin.template:
     src: pelican/Caddyfile.j2
-    dest: /srv/www/dylanw.net/pelican/Caddyfile
+    dest: "/srv/www/{{ net_domain }}/pelican/Caddyfile"
 
 - name: Deploy Pterodactyl Docker composition
   ansible.builtin.template:
     src: pelican/docker-compose.yml.j2
-    dest: /srv/www/dylanw.net/pelican/docker-compose.yml
+    dest: "/srv/www/{{ net_domain }}/pelican/docker-compose.yml"
 
 - name: Bring Docker containers up
   community.docker.docker_compose_v2:
-    project_src: /srv/www/dylanw.net/pelican
+    project_src: "/srv/www/{{ net_domain }}/pelican"

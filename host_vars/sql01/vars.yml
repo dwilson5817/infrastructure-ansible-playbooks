@@ -3,8 +3,8 @@
 vault_mariadb_passwords: "{{ lookup('community.hashi_vault.vault_kv2_get', 'sql/mariadb/passwords')['secret'] }}"
 
 dns_records:
-  - zone: dylanw.net
-    record: sql.dylanw.net
+  - zone: "{{ net_domain }}"
+    record: sql
     type: CNAME
     value: "{{ ansible_host }}"
 
@@ -12,17 +12,17 @@ mariadb_passwords: "{{ vault_mariadb_passwords }}"
 
 mariadb_users:
 - name: antrim
-  host: web01.london.dylanw.net
+  host: "web01.london.{{ net_domain }}"
 - name: dylanw
-  host: web01.london.dylanw.net
+  host: "web01.london.{{ net_domain }}"
 - name: miners
-  host: web01.london.dylanw.net
+  host: "web01.london.{{ net_domain }}"
 - name: miners
-  host: game01.london.dylanw.net
+  host: "game01.london.{{ net_domain }}"
 - name: miners
-  host: game02.london.dylanw.net
+  host: "game02.london.{{ net_domain }}"
 - name: sqladm
-  host: desktop01.london.dylanw.net
+  host: "desktop01.london.{{ net_domain }}"
 
 mariadb_dbs:
 - antrim_website

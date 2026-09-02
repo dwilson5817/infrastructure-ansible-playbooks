@@ -74,23 +74,23 @@
           static_configs:
             - targets:
                 # dylanw.dev
-                - www.dylanw.dev
-                - blog.dylanw.dev
-                - resume.dylanw.dev
-                - check.dylanw.dev
-                - portal.dylanw.dev
-                - market.dylanw.dev
-                - gitlab.dylanw.dev
+                - "www.{{ dev_domain }}"
+                - "blog.{{ dev_domain }}"
+                - "resume.{{ dev_domain }}"
+                - "check.{{ dev_domain }}"
+                - "portal.{{ dev_domain }}"
+                - "market.{{ dev_domain }}"
+                - "gitlab.{{ dev_domain }}"
                 # antrimtiling.com
                 - www.antrimtiling.com
                 # minersrealm.net
                 - www.minersrealm.net
                 - panel.minersrealm.net
                 # dylanw.net
-                - monitoring.dylanw.net
-                - mail.dylanw.net
-#                - vault.dylanw.net      # doesn't have port 80 open in AWS
-#                - prometheus.dylanw.net # needs authentication
+                - "monitoring.{{ net_domain }}"
+                - "mail.{{ net_domain }}"
+#                - "vault.{{ net_domain }}"      # doesn't have port 80 open in AWS
+#                - "prometheus.{{ net_domain }}" # needs authentication
           relabel_configs:
             - source_labels: [__address__]
               target_label: __param_target
@@ -465,8 +465,8 @@
             name: Auth Central
             client_id: "{{ grafana_generic_oauth_client_id }}"
             client_secret: "{{ grafana_generic_oauth_client_secret }}"
-            auth_url: https://auth.dylanw.net/authorize
-            token_url: https://auth.dylanw.net/api/oidc/token
+            auth_url: "https://auth.{{ net_domain }}/authorize"
+            token_url: "https://auth.{{ net_domain }}/api/oidc/token"
             scopes: openid profile email
             auto_login: yes
             use_pkce: yes

@@ -7,10 +7,10 @@
       become: yes
       vars:
         acme_certs:
-          pages.dylanw.dev:
-            cloudflare_zone: dylanw.dev
+          "pages.{{ dev_domain }}":
+            cloudflare_zone: "{{ dev_domain }}"
             alternative_domains:
-              - '*.pages.dylanw.dev'
+              - "*.pages.{{ dev_domain }}"
     - role: gitlab
       become: yes
     - role: backups

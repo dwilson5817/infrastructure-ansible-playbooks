@@ -2,4 +2,4 @@
 
 dns_records:
   - record: minecraft
-    zone: dylanw.net
+    zone: "{{ net_domain }}"

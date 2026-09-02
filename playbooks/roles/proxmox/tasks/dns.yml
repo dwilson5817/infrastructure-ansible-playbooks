@@ -13,4 +13,4 @@
     dns:
       dns1: 1.1.1.1
       dns2: 8.8.8.8
-      search: dylanw.net
+      search: "{{ net_domain }}"
