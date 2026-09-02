@@ -27,7 +27,7 @@
   - role: mailcow.mailcow
     become: yes
     vars:
-      mailcow__hostname: "{{ mail_hostname }}"
+      mailcow__hostname: "mail.{{ net_domain }}"
       mailcow__config_http_redirect: y
   - role: backups
     become: yes
