@@ -2,8 +2,8 @@ vault_pocket_id_env: "{{ lookup('community.hashi_vault.vault_kv2_get', 'pocket-i
 
 backups_jobs:
   www_minersrealm_net_daily:
-    hour: "22"
-    minute: "03"
+    hour: "01"
+    minute: "00"
     local_dir: "/var/backups/www_minersrealm_net"
     command: >-
       tar -czf /var/backups/www_minersrealm_net/$(date +\%F).tar.gz -C /srv/www/minersrealm.net www &&

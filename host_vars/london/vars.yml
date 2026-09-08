@@ -21,7 +21,7 @@ backups_aws_enabled: false
 
 backups_jobs:
   proxmox_daily:
-    hour: "04"
+    hour: "05"
     minute: "00"
     local_dir: "/mnt/pve/ftpback-rbx3-346.ovh.net/dump"
 
@@ -30,7 +30,7 @@ proxmox_backup_jobs:
     all: true
     prune_backups: keep-last=1
     storage: ftpback-rbx3-346.ovh.net
-    schedule: 02:00
+    schedule: 00:00
     compress: zstd
     comment: Daily backups
     exclude:
