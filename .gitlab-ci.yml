@@ -17,6 +17,7 @@ execute-ansible:
 
     # Temporary debugging information after rotating GitLab OIDC certificates
     - 'curl -s --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"project\" }" "$VAULT_ADDR/v1/auth/gitlab-jwt/login"'
+    - 'echo "$ANSIBLE_HASHI_VAULT_JWT" | cut -d. -f1 | base64 -d 2>/dev/null | jq .'
     - 'echo "$ANSIBLE_HASHI_VAULT_JWT" | cut -d. -f2 | base64 -d 2>/dev/null | jq .'
 
     # Use GitLab JWT token to obtain a Vault token to sign our SSH key
