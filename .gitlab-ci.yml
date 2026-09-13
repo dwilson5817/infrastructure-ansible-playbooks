@@ -7,6 +7,10 @@ execute-ansible:
   stage: deploy
   image: python:3.13.4
   script:
+    # Temporary debugging information after rotating GitLab OIDC certificates
+    - 'curl -s --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"project\" }" "$VAULT_ADDR/v1/auth/gitlab-jwt/login"'
+    - 'echo "$ANSIBLE_HASHI_VAULT_JWT" | cut -d. -f2 | base64 -d 2>/dev/null | jq .'
+
     # Generate a new SSH key to be used for connecting to VMs
     # This will be signed by Vault
     - ssh-keygen -t rsa -q -f "$HOME/.ssh/id_rsa" -N ""
@@ -14,10 +18,6 @@ execute-ansible:
     # curl and jq are used for making API request to Vault, sshpass is used by Ansible for connecting to use the 'ssh'
     # connection type with passwords and, awscli will be used to get temporary credentials from STS
     - apt update && apt install -y curl jq sshpass awscli
-
-    # Temporary debugging information after rotating GitLab OIDC certificates
-    - 'curl -s --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"project\" }" "$VAULT_ADDR/v1/auth/gitlab-jwt/login"'
-    - 'echo "$ANSIBLE_HASHI_VAULT_JWT" | cut -d. -f2 | base64 -d 2>/dev/null | jq .'
 
     # Use GitLab JWT token to obtain a Vault token to sign our SSH key
     - 'export VAULT_TOKEN=$(curl --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"ssh-user\" }" "$VAULT_ADDR/v1/auth/gitlab-jwt/login" | jq -r ".auth.client_token")'
