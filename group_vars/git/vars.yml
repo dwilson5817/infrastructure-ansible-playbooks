@@ -5,7 +5,7 @@ vault_pocket_id_clients_gitlab: "{{ lookup('community.hashi_vault.vault_kv2_get'
 gitlab_domain: "gitlab.{{ dev_domain }}"
 gitlab_pages_domain: "pages.{{ dev_domain }}"
 
-gitlab_version: gitlab-ee=19.3.2-ee.0
+gitlab_version: gitlab-ee=19.4.0-ee.0
 
 gitlab_config_smtp_enable: "{{ vault_gitlab_config_smtp['enable'] }}"
 gitlab_config_smtp_host: "{{ vault_gitlab_config_smtp['host'] }}"
