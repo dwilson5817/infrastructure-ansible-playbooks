@@ -38,6 +38,7 @@
           - curl
           - git
           - jq
+          - build-essential
 
           # Ansible
           - sshpass
