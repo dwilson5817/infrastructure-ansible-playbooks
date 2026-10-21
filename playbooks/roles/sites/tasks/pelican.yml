@@ -15,6 +15,12 @@
     src: pelican/docker-compose.yml.j2
     dest: "/srv/www/{{ net_domain }}/pelican/docker-compose.yml"
 
+- name: Deploy PHP hardening configuration for Pelican
+  ansible.builtin.template:
+    src: php/hardening.ini.j2
+    dest: "/srv/www/{{ net_domain }}/pelican/php-hardening.ini"
+    mode: '0644'
+
 - name: Bring Docker containers up
   community.docker.docker_compose_v2:
     project_src: "/srv/www/{{ net_domain }}/pelican"

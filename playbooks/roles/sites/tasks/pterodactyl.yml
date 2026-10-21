@@ -10,6 +10,14 @@
     src: pterodactyl/docker-compose.yml.j2
     dest: /srv/www/minersrealm.net/panel/docker-compose.yml
 
+- name: Deploy PHP hardening configuration for Pterodactyl
+  ansible.builtin.template:
+    src: php/hardening.ini.j2
+    dest: /srv/www/minersrealm.net/panel/php-hardening.ini
+    mode: '0644'
+  vars:
+    php_error_log: /app/storage/logs/php-errors.log
+
 - name: Bring Docker containers up
   community.docker.docker_compose_v2:
     project_src: /srv/www/minersrealm.net/panel

@@ -19,6 +19,14 @@
     src: nameless/docker-compose.yml.j2
     dest: /srv/www/minersrealm.net/www/docker-compose.yml
 
+- name: Deploy PHP hardening configuration for NamelessMC
+  ansible.builtin.template:
+    src: php/hardening.ini.j2
+    dest: /srv/www/minersrealm.net/www/php-hardening.ini
+    mode: '0644'
+  vars:
+    php_post_max_size: 64M
+
 - name: Bring Docker containers up for NamelessMC
   community.docker.docker_compose_v2:
     project_src: /srv/www/minersrealm.net/www

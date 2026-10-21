@@ -4,11 +4,15 @@ services:
     restart: always
     pull_policy: every_12h
   panel:
-    image: ghcr.io/pterodactyl/panel:latest
+    image: ghcr.io/pterodactyl/panel:v1.15.2
     restart: always
-    pull_policy: every_12h
     ports:
       - "127.0.0.1:8100:80"
+    volumes:
+      - ./php-hardening.ini:/usr/local/etc/php/conf.d/zzzz-hardening.ini:ro
+      - panel-logs:/app/storage/logs
+      - panel-fpm-logs:/usr/local/var/log
+      - panel-nginx-logs:/var/log/nginx
     links:
       - cache
     environment:
@@ -57,3 +61,8 @@ services:
       SESSION_SECURE_COOKIE: "{{ pterodactyl_env['session_secure_cookie'] | default('') }}"
 
       MAIL_DRIVER: "{{ pterodactyl_env['mail_driver'] | default('') }}"
+
+volumes:
+  panel-logs:
+  panel-fpm-logs:
+  panel-nginx-logs:

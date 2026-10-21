@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: namelessmc/nginx:v2.2.3
+    image: namelessmc/nginx:v{{ nameless_core_version }}
     ports: [ '127.0.0.1:8101:8080' ]
     volumes:
       - type: bind
@@ -19,11 +19,15 @@ services:
     restart: always
 
   php:
-    image: namelessmc/php:v2.2.3
+    image: namelessmc/php:v{{ nameless_core_version }}
     volumes:
       - type: bind # same as web container
         source: ./web
         target: /data
+      - type: bind
+        source: ./php-hardening.ini
+        target: /usr/local/etc/php/conf.d/zzzz-hardening.ini
+        read_only: true
       - target: /tmp
         tmpfs:
           size: 25M

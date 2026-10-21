@@ -1,0 +1,14 @@
+; Managed by Ansible.  Mounted last in conf.d so it overrides the image's own settings.
+;
+; Session upload progress is the entry point for PHP2Shell (CVE-2026-109618) and none of
+; these applications use it.  Errors are logged so memory exhaustion and other fatal
+; errors leave a trace.
+session.upload_progress.enabled = Off
+log_errors = On
+{% if php_error_log is defined %}
+error_log = {{ php_error_log }}
+{% endif %}
+{% if php_post_max_size is defined %}
+post_max_size = {{ php_post_max_size }}
+upload_max_filesize = {{ php_post_max_size }}
+{% endif %}
