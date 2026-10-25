@@ -6,8 +6,6 @@ vault_nameless_email: "{{ lookup('community.hashi_vault.vault_kv2_get', 'web/nam
 
 dns_records:
   - zone: "{{ net_domain }}"
-    record: auth
-  - zone: "{{ net_domain }}"
     record: pelican
   - zone: minersrealm.net
     record: minersrealm.net
@@ -20,7 +18,6 @@ web_certs:
   "{{ net_domain }}":
     cloudflare_zone: "{{ net_domain }}"
     alternative_domains:
-    - "auth.{{ net_domain }}"
     - "pelican.{{ net_domain }}"
     - "www.{{ net_domain }}"
   minersrealm.net:
