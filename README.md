@@ -26,8 +26,12 @@ To work with these playbooks locally, follow these steps:
 
 4. **Forward the Proxmox API over SSH:**
    The Proxmox API only listens on loopback, so the dynamic inventory reaches it through an SSH port forward. This
-   requires an SSH certificate for the `ansible` user from Vault.
+   requires an SSH certificate for the `ansible` user from Vault with the `permit-port-forwarding` extension, which
+   isn't included by default.
    ```bash
+   jq -n --arg key "$(cat ~/.ssh/id_ed25519.pub)" \
+     '{public_key: $key, extensions: {"permit-pty": "", "permit-port-forwarding": ""}}' \
+     | vault write -field=signed_key infrastructure/ssh-user/sign/ansible - > ~/.ssh/id_ed25519-cert.pub
    ssh -f -N -L 8006:127.0.0.1:8006 ansible@london.dylanw.net
    ```
 

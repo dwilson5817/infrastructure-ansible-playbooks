@@ -18,8 +18,8 @@ execute-ansible:
     # Use GitLab JWT token to obtain a Vault token to sign our SSH key
     - 'export VAULT_TOKEN=$(curl --request POST --data "{ \"jwt\": \"$ANSIBLE_HASHI_VAULT_JWT\", \"role\": \"ssh-user\" }" "$VAULT_ADDR/v1/auth/gitlab-jwt/login" | jq -r ".auth.client_token")'
 
-    # Ask Vault to sign our certificate
-    - 'curl --header "X-Vault-Token: $VAULT_TOKEN" --request POST --data "{ \"public_key\": \"$(cat $HOME/.ssh/id_rsa.pub)\" }" "$VAULT_ADDR/v1/infrastructure/ssh-user/sign/ansible" | jq -r ".data.signed_key" > $HOME/.ssh/id_rsa-cert.pub'
+    # Ask Vault to sign our certificate, port forwarding is needed to reach the Proxmox API
+    - 'curl --header "X-Vault-Token: $VAULT_TOKEN" --request POST --data "{ \"public_key\": \"$(cat $HOME/.ssh/id_rsa.pub)\", \"extensions\": { \"permit-pty\": \"\", \"permit-port-forwarding\": \"\" } }" "$VAULT_ADDR/v1/infrastructure/ssh-user/sign/ansible" | jq -r ".data.signed_key" > $HOME/.ssh/id_rsa-cert.pub'
 
     # The Proxmox API only listens on loopback, forward it over SSH for the dynamic inventory
     - ssh -f -N -o ExitOnForwardFailure=yes -o StrictHostKeyChecking=accept-new -L 8006:127.0.0.1:8006 ansible@london.dylanw.net
