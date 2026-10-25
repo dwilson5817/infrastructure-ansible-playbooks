@@ -4,6 +4,9 @@ proxmox_ssh_user: "{{ vault_ansible['ssh_user'] }}"
 
 proxmox_tunnel_hostname: "proxmox.{{ net_domain }}"
 
+# pveproxy only listens on loopback, API tasks run on the node itself
+proxmox_api_host: 127.0.0.1
+
 proxmox_token_user: root@pam
 proxmox_token_id: ansible
 

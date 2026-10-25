@@ -24,14 +24,21 @@ To work with these playbooks locally, follow these steps:
    ansible-galaxy install -r requirements.yml
    ```
 
-4. **Configure environment variables:**
+4. **Forward the Proxmox API over SSH:**
+   The Proxmox API only listens on loopback, so the dynamic inventory reaches it through an SSH port forward. This
+   requires an SSH certificate for the `ansible` user from Vault.
+   ```bash
+   ssh -f -N -L 8006:127.0.0.1:8006 ansible@london.dylanw.net
+   ```
+
+5. **Configure environment variables:**
    Set the following variables to authenticate with HashiCorp Vault:
    ```bash
    export VAULT_ADDR='your-vault-address'
    export VAULT_TOKEN='your-vault-token'
    ```
 
-5. **Run the Ansible playbooks:**
+6. **Run the Ansible playbooks:**
    ```bash
    ansible-playbook -i london.proxmox.yml playbooks/main.yml
    ```
@@ -45,7 +52,12 @@ doesn't exist on a fresh installation, so the first run connects as `root` using
 1. **Obtain an SSH certificate for the `ansible` user from Vault** so the playbook can verify certificate login works
    before disabling password authentication.
 
-2. **Run the Proxmox playbook as `root`:**
+2. **Forward the Proxmox API over SSH as `root`:**
+   ```bash
+   ssh -f -N -L 8006:127.0.0.1:8006 root@london.dylanw.net
+   ```
+
+3. **Run the Proxmox playbook as `root`:**
    ```bash
    ansible-playbook -i london.proxmox.yml playbooks/proxmox.yml -e ansible_ssh_user=root --ask-pass
    ```

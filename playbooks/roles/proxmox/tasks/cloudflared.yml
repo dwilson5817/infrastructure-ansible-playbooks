@@ -65,7 +65,7 @@
 
       ingress:
         - hostname: {{ proxmox_tunnel_hostname }}
-          service: https://localhost:8006
+          service: https://127.0.0.1:8006
           originRequest:
             # Connection to pveproxy is over loopback, its certificate is for the node hostname
             noTLSVerify: true
@@ -121,3 +121,15 @@
     solo: yes
     comment: Managed by Ansible
     api_token: "{{ cloudflare_api_token }}"
+
+# The UI and API are only reachable through the tunnel or an SSH port forward
+- name: Restrict pveproxy to loopback
+  ansible.builtin.lineinfile:
+    path: /etc/default/pveproxy
+    regexp: '^LISTEN_IP='
+    line: 'LISTEN_IP="127.0.0.1"'
+    create: true
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart pveproxy
