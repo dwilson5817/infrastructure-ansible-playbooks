@@ -1,19 +1,35 @@
-- name: Disable Proxmox Enterprise repository
-  ansible.builtin.apt_repository:
-    repo: deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
-    filename: pve-enterprise
-    update_cache: false
+- name: Disable Proxmox and Ceph enterprise repositories
+  ansible.builtin.file:
+    path: "/etc/apt/sources.list.d/{{ item }}"
     state: absent
+  loop:
+    # Proxmox VE 8 and earlier
+    - pve-enterprise.list
+    - ceph.list
+    # Proxmox VE 9 and later use deb822 sources
+    - pve-enterprise.sources
+    - ceph.sources
+    # Added by the OVH installer, duplicates pve-no-subscription below
+    - pve-install-repo.list
+  register: apt_enterprise_repos
 
-- name: Disable Ceph Enterprise repository
-  ansible.builtin.apt_repository:
-    repo: deb https://enterprise.proxmox.com/debian/ceph-quincy bookworm enterprise
-    filename: ceph
-    update_cache: false
-    state: absent
+# Proxmox VE 9 no longer trusts the archive key globally, so it must be referenced by the repository
+- name: Check for Proxmox archive keyring
+  ansible.builtin.stat:
+    path: /usr/share/keyrings/proxmox-archive-keyring.gpg
+  register: proxmox_archive_keyring
 
 - name: Enable Proxmox Community repository
-  ansible.builtin.apt_repository:
-    repo: deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
-    filename: pve-no-subscription
-    state: present
+  ansible.builtin.copy:
+    content: |
+      deb {{ '[signed-by=/usr/share/keyrings/proxmox-archive-keyring.gpg] ' if proxmox_archive_keyring.stat.exists else '' }}http://download.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-no-subscription
+    dest: /etc/apt/sources.list.d/pve-no-subscription.list
+    owner: root
+    group: root
+    mode: '0644'
+  register: apt_community_repo
+
+- name: Update APT package cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: apt_enterprise_repos.changed or apt_community_repo.changed
