@@ -1,0 +1,74 @@
+---
+
+# On a fresh install we connect as root with the OVH password, which may not have sudo available yet
+- name: Install sudo
+  ansible.builtin.apt:
+    name: sudo
+    state: present
+  become: "{{ ansible_user_id != 'root' }}"
+
+- name: Create Ansible user
+  ansible.builtin.user:
+    name: "{{ proxmox_ssh_user }}"
+    shell: /bin/bash
+    state: present
+
+- name: Allow Ansible user passwordless sudo
+  ansible.builtin.copy:
+    content: |
+      {{ proxmox_ssh_user }} ALL=(ALL) NOPASSWD:ALL
+    dest: "/etc/sudoers.d/{{ proxmox_ssh_user }}"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Write Vault SSH user CA public key
+  ansible.builtin.copy:
+    content: |
+      {{ lookup('ansible.builtin.url', 'https://vault.dylanw.net/v1/infrastructure/ssh-user/public_key') }}
+    dest: /etc/ssh/trusted-user-ca-keys.pem
+    owner: root
+    group: root
+    mode: '0644'
+
+# Must sort before any 50-cloud-init.conf from the OVH image, the first value sshd reads wins
+- name: Trust Vault SSH user CA
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible
+      TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys.pem
+    dest: /etc/ssh/sshd_config.d/00-trusted-ca.conf
+    owner: root
+    group: root
+    mode: '0644'
+  register: sshd_trusted_ca
+
+# Only adds an authentication method, so it is safe to apply immediately
+- name: Apply trusted CA configuration
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
+  when: sshd_trusted_ca.changed
+
+- name: Verify certificate login and sudo work before disabling passwords
+  ansible.builtin.command: >-
+    ssh -o BatchMode=yes -o PasswordAuthentication=no -o StrictHostKeyChecking=accept-new
+    {{ proxmox_ssh_user }}@{{ ansible_host }} sudo -n true
+  delegate_to: localhost
+  become: no
+  changed_when: false
+
+# Reloaded by a handler at the end of the play, so a bootstrap run using the root password keeps working until then
+- name: Disable password authentication
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      PermitRootLogin prohibit-password
+    dest: /etc/ssh/sshd_config.d/00-authentication.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload sshd

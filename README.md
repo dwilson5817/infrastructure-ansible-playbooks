@@ -36,6 +36,22 @@ To work with these playbooks locally, follow these steps:
    ansible-playbook -i london.proxmox.yml playbooks/main.yml
    ```
 
+### Bootstrapping a fresh Proxmox installation
+
+GitLab and its runners are hosted on the Proxmox node, so the first run against a fresh installation must be done
+locally. Ansible connects to Proxmox as the `ansible` user using an SSH certificate signed by Vault, but this user
+doesn't exist on a fresh installation, so the first run connects as `root` using the password set during installation.
+
+1. **Obtain an SSH certificate for the `ansible` user from Vault** so the playbook can verify certificate login works
+   before disabling password authentication.
+
+2. **Run the Proxmox playbook as `root`:**
+   ```bash
+   ansible-playbook -i london.proxmox.yml playbooks/proxmox.yml -e ansible_ssh_user=root --ask-pass
+   ```
+
+Password authentication is disabled at the end of this run.  All subsequent runs, including CI, connect as `ansible`.
+
 ### Deployment
 
 The following machine types are managed within this repository. All nodes are initialized with a baseline configuration including system package management, user account provisioning, and SSH authorized key distribution.

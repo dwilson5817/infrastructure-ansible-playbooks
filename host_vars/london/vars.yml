@@ -1,11 +1,5 @@
 ---
 
-vault_proxmox: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/proxmox-credentials')['secret'] }}"
-
-# Secrets from Vault
-ansible_ssh_user: "{{ vault_proxmox['ssh_user'] }}"
-ansible_ssh_pass: "{{ vault_proxmox['ssh_password'] }}"
-
 proxmox_host: london
 
 template_version: 20260220-2394
