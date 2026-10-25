@@ -30,9 +30,6 @@
     path: /srv/www/minersrealm.net
     state: directory
 
-- name: Configure Pocket ID
-  ansible.builtin.include_tasks: pocket_id.yml
-
 - name: Configure Pterodactyl
   ansible.builtin.include_tasks: pterodactyl.yml
 
