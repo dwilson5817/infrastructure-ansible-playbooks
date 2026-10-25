@@ -17,7 +17,15 @@
     state: restarted
     daemon_reload: true
 
+# spiceproxy reads LISTEN_IP from /etc/default/pveproxy too
 - name: Restart pveproxy
   ansible.builtin.systemd:
     name: pveproxy
     state: restarted
+  listen: Restart Proxmox proxies
+
+- name: Restart spiceproxy
+  ansible.builtin.systemd:
+    name: spiceproxy
+    state: restarted
+  listen: Restart Proxmox proxies

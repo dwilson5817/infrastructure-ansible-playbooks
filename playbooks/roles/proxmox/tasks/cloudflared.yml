@@ -123,7 +123,7 @@
     api_token: "{{ cloudflare_api_token }}"
 
 # The UI and API are only reachable through the tunnel or an SSH port forward
-- name: Restrict pveproxy to loopback
+- name: Restrict pveproxy and spiceproxy to loopback
   ansible.builtin.lineinfile:
     path: /etc/default/pveproxy
     regexp: '^LISTEN_IP='
@@ -132,4 +132,4 @@
     owner: root
     group: root
     mode: '0644'
-  notify: Restart pveproxy
+  notify: Restart Proxmox proxies
