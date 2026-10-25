@@ -1,0 +1,123 @@
+---
+
+# The Proxmox UI used to be exposed by an NGINX reverse proxy, it is now only reachable through Cloudflare Access
+- name: Remove NGINX
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - nginx-common
+    state: absent
+    purge: true
+    autoremove: true
+
+- name: Remove NGINX systemd override
+  ansible.builtin.file:
+    path: /etc/systemd/system/nginx.service.d
+    state: absent
+  register: nginx_override_removed
+
+- name: Reload systemd after removing NGINX override
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: nginx_override_removed.changed
+
+- name: Add Cloudflare package signing key
+  ansible.builtin.get_url:
+    url: https://pkg.cloudflare.com/cloudflare-public-v2.gpg
+    dest: /usr/share/keyrings/cloudflare-public-v2.gpg
+    mode: '0644'
+
+- name: Add Cloudflare package repository
+  ansible.builtin.apt_repository:
+    repo: deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main
+    filename: cloudflared
+    state: present
+
+- name: Install cloudflared
+  ansible.builtin.apt:
+    name: cloudflared
+    state: present
+
+- name: Create cloudflared configuration directory
+  ansible.builtin.file:
+    path: /etc/cloudflared
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Write tunnel credentials
+  ansible.builtin.copy:
+    content: "{{ proxmox_tunnel_credentials | to_json }}"
+    dest: /etc/cloudflared/credentials.json
+    owner: root
+    group: root
+    mode: '0600'
+  no_log: true
+  notify: Restart cloudflared
+
+- name: Write tunnel configuration
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible
+      tunnel: {{ proxmox_tunnel_credentials['TunnelID'] }}
+      credentials-file: /etc/cloudflared/credentials.json
+
+      ingress:
+        - hostname: {{ proxmox_tunnel_hostname }}
+          service: https://localhost:8006
+          originRequest:
+            # Connection to pveproxy is over loopback, its certificate is for the node hostname
+            noTLSVerify: true
+            # Reject any request without a valid Cloudflare Access token, even if the Access application is removed
+            access:
+              required: true
+              teamName: {{ proxmox_tunnel_access_team | mandatory }}
+              audTag:
+                - {{ proxmox_tunnel_access_aud | mandatory }}
+        - service: http_status:404
+    dest: /etc/cloudflared/config.yml
+    owner: root
+    group: root
+    mode: '0600'
+  notify: Restart cloudflared
+
+- name: Install cloudflared systemd service
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Cloudflare Tunnel
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=notify
+      ExecStart=/usr/bin/cloudflared --no-autoupdate --config /etc/cloudflared/config.yml tunnel run
+      Restart=on-failure
+      RestartSec=5s
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/cloudflared.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart cloudflared
+
+- name: Enable and start cloudflared
+  ansible.builtin.systemd:
+    name: cloudflared
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Create DNS CNAME record for the tunnel
+  community.general.cloudflare_dns:
+    zone: "{{ net_domain }}"
+    record: "{{ proxmox_tunnel_hostname }}"
+    type: CNAME
+    value: "{{ proxmox_tunnel_credentials['TunnelID'] }}.cfargotunnel.com"
+    proxied: true
+    solo: yes
+    comment: Managed by Ansible
+    api_token: "{{ cloudflare_api_token }}"

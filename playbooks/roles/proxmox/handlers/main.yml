@@ -10,3 +10,9 @@
     name: ssh
     state: reloaded
   listen: Reload sshd
+
+- name: Restart cloudflared
+  ansible.builtin.systemd:
+    name: cloudflared
+    state: restarted
+    daemon_reload: true

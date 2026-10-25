@@ -2,6 +2,8 @@
 
 proxmox_ssh_user: "{{ vault_ansible['ssh_user'] }}"
 
+proxmox_tunnel_hostname: "proxmox.{{ net_domain }}"
+
 proxmox_token_user: root@pam
 proxmox_token_id: ansible
 

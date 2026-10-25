@@ -1,6 +1,12 @@
 ---
 
+vault_cloudflare_tunnel: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/cloudflare-tunnel')['secret'] }}"
+
 proxmox_host: london
+
+proxmox_tunnel_credentials: "{{ vault_cloudflare_tunnel }}"
+proxmox_tunnel_access_team: dylanw-net
+proxmox_tunnel_access_aud: d2efe3bc162729e380c09801129e1b12040fe76ee541a4ec6e0262ccecf4cc33
 
 template_version: 20260220-2394
 template_checksum: 8e7becf9843224e31a271df5eb6aa90a8077642786996f88f299d4f16043c9bfc563a74437ebfe17990c58362176c309cc61c6f09a83f1c274d799dd02997d4d
