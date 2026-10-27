@@ -7,24 +7,22 @@
   changed_when: false
 
 # pveum has no create-or-update, so add the realm once and then keep its settings in sync. The client secret is passed
-# on the command line, so hide it from the logs.
+# on the command line, so hide it from the logs, and report pveum's error separately below.
 - name: Configure Pocket ID login realm
   ansible.builtin.command:
-    argv: "{{ ['pveum', 'realm', action, proxmox_oidc_realm] + type + options }}"
+    argv: "{{ ['pveum', 'realm', proxmox_oidc_realm_command, proxmox_oidc_realm] + proxmox_oidc_create_options + proxmox_oidc_options }}"
   vars:
-    exists: "{{ proxmox_oidc_realm in proxmox_realms.stdout | from_json | map(attribute='realm') }}"
-    action: "{{ 'modify' if exists else 'add' }}"
-    type: "{{ [] if exists else ['--type', 'openid'] }}"
-    options:
+    proxmox_oidc_realm_exists: "{{ proxmox_oidc_realm in proxmox_realms.stdout | from_json | map(attribute='realm') }}"
+    proxmox_oidc_realm_command: "{{ 'modify' if proxmox_oidc_realm_exists else 'add' }}"
+    # Can only be set when the realm is created, as changing them would change every user's identity
+    proxmox_oidc_create_options: "{{ [] if proxmox_oidc_realm_exists else ['--type', 'openid', '--username-claim', 'preferred_username'] }}"
+    proxmox_oidc_options:
       - --issuer-url
       - "{{ proxmox_oidc_issuer_url }}"
       - --client-id
       - "{{ vault_pocket_id_clients_proxmox['client_id'] }}"
       - --client-key
       - "{{ vault_pocket_id_clients_proxmox['client_secret'] }}"
-      # Pocket ID usernames are unique and readable, unlike the default subject claim
-      - --username-claim
-      - preferred_username
       # Only users created below may log in
       - --autocreate
       - '0'
@@ -32,7 +30,14 @@
       - '1'
       - --comment
       - Pocket ID
+  register: proxmox_oidc_realm_result
+  failed_when: false
   no_log: true
+
+- name: Report Pocket ID login realm errors
+  ansible.builtin.fail:
+    msg: "pveum realm failed: {{ proxmox_oidc_realm_result.stderr }}"
+  when: proxmox_oidc_realm_result.rc != 0
 
 - name: List users
   ansible.builtin.command: pveum user list --output-format json
