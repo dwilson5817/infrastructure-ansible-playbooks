@@ -3663,10 +3663,11 @@ pages_nginx['enable'] = {{ gitlab_config_pages_nginx_enable }}
 #
 # By default, GitLab runs with a configuration designed to handle many concurrent connections.
 #
-# For small installations that do not require high throughput, disable Puma Clustered mode. This configuration runs only
-# a single Puma process to serve the application.
+# Keep Puma in clustered mode with the minimum of two workers rather than disabling it. In single mode the memory
+# watchdog restarts the only Puma process whenever it exceeds PUMA_WORKER_MAX_MEMORY, and GitLab returns 502s for the
+# ~50 seconds it takes to boot again. With two workers the other one keeps serving requests while one is replaced.
 #
-puma['worker_processes'] = 0
+puma['worker_processes'] = 2
 
 ## Optimize Sidekiq
 #
