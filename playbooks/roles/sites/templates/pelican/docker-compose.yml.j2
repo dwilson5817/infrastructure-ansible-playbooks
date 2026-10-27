@@ -11,11 +11,7 @@ services:
     volumes:
       - pelican-data:/pelican-data
       - pelican-logs:/var/www/html/storage/logs
-      - type: volume
-        source: pelican-data
-        target: /var/www/html/plugins
-        volume:
-          subpath: plugins
+      - pelican-plugins:/var/www/html/plugins
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./php-hardening.ini:/usr/local/etc/php/conf.d/zzzz-hardening.ini:ro
     environment:
@@ -33,6 +29,7 @@ services:
 volumes:
   pelican-data:
   pelican-logs:
+  pelican-plugins:
 
 networks:
   default:
