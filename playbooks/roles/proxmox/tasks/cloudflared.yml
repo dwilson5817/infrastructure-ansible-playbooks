@@ -27,16 +27,32 @@
     dest: /usr/share/keyrings/cloudflare-public-v2.gpg
     mode: '0644'
 
+# apt_repository only writes legacy .list files, which would duplicate the .sources file created by apt modernize-sources
+- name: Remove legacy Cloudflare package repository
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/cloudflared.list
+    state: absent
+  register: cloudflared_legacy_repo
+
 - name: Add Cloudflare package repository
-  ansible.builtin.apt_repository:
-    repo: deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main
-    filename: cloudflared
-    state: present
+  ansible.builtin.copy:
+    content: |
+      Types: deb
+      URIs: https://pkg.cloudflare.com/cloudflared
+      Suites: any
+      Components: main
+      Signed-By: /usr/share/keyrings/cloudflare-public-v2.gpg
+    dest: /etc/apt/sources.list.d/cloudflared.sources
+    owner: root
+    group: root
+    mode: '0644'
+  register: cloudflared_repo
 
 - name: Install cloudflared
   ansible.builtin.apt:
     name: cloudflared
     state: present
+    update_cache: "{{ cloudflared_legacy_repo.changed or cloudflared_repo.changed }}"
 
 - name: Create cloudflared configuration directory
   ansible.builtin.file:

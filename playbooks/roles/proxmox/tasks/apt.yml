@@ -9,22 +9,27 @@
     # Proxmox VE 9 and later use deb822 sources
     - pve-enterprise.sources
     - ceph.sources
-    # Added by the OVH installer, duplicates pve-no-subscription below
+    # Added by the OVH installer, duplicates proxmox.sources below (converted to .sources by apt modernize-sources)
     - pve-install-repo.list
+    - pve-install-repo.sources
+    # Previous names of proxmox.sources below
+    - pve-no-subscription.list
+    - pve-no-subscription.sources
   register: apt_enterprise_repos
 
-# Proxmox VE 8 trusts the release key globally, and its gpgv can't read the combined archive keyring. Releases that
-# don't install a global key must reference the archive keyring instead.
-- name: Check for globally trusted Proxmox release key
-  ansible.builtin.stat:
-    path: "/etc/apt/trusted.gpg.d/proxmox-release-{{ ansible_distribution_release }}.gpg"
-  register: proxmox_release_key
-
+# Uses the same file name and format as the Proxmox VE 9 installer. Debian 12's gpgv can't read the combined archive
+# keyring, so Proxmox VE 8 relies on the globally trusted release key instead.
 - name: Enable Proxmox Community repository
   ansible.builtin.copy:
     content: |
-      deb {{ '' if proxmox_release_key.stat.exists else '[signed-by=/usr/share/keyrings/proxmox-archive-keyring.gpg] ' }}http://download.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-no-subscription
-    dest: /etc/apt/sources.list.d/pve-no-subscription.list
+      Types: deb
+      URIs: http://download.proxmox.com/debian/pve
+      Suites: {{ ansible_distribution_release }}
+      Components: pve-no-subscription
+      {% if ansible_distribution_major_version | int >= 13 %}
+      Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+      {% endif %}
+    dest: /etc/apt/sources.list.d/proxmox.sources
     owner: root
     group: root
     mode: '0644'

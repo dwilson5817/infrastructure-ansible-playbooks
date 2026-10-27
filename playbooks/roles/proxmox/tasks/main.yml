@@ -3,6 +3,9 @@
 - name: Configure SSH certificate authentication
   ansible.builtin.include_tasks: ssh.yml
 
+- name: Configure local users
+  ansible.builtin.include_tasks: users.yml
+
 - name: Configure Python environment
   ansible.builtin.include_tasks: python.yml
 

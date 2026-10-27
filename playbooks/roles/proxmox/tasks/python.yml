@@ -5,6 +5,20 @@
     name: python3-venv
     state: present
 
+# The venv links to /usr/bin/python3, so after a major upgrade (e.g. Proxmox VE 8 to 9) it runs the new Python but
+# its packages, including pip, are still installed for the old version. Recreate it if they can't be imported.
+- name: Check venv packages can be imported
+  ansible.builtin.command: /opt/ansible_venv/bin/python -c "import pip, proxmoxer"
+  register: venv_check
+  changed_when: false
+  failed_when: false
+
+- name: Remove venv built for a different Python version
+  ansible.builtin.file:
+    path: /opt/ansible_venv
+    state: absent
+  when: venv_check.rc != 0
+
 - name: Create venv and install Proxmoxer 2.2.0
   ansible.builtin.pip:
     name:
