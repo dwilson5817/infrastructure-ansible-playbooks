@@ -1,6 +1,7 @@
 ---
 
 vault_cloudflare_tunnel: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/cloudflare-tunnel')['secret'] }}"
+vault_proxmox_user_dylan: "{{ lookup('community.hashi_vault.vault_kv2_get', 'proxmox/users/dylan')['secret'] }}"
 
 proxmox_host: london
 

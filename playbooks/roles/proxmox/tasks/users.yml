@@ -1,0 +1,14 @@
+---
+
+# The salt is derived from the host and user so the hash, and therefore this task, only changes with the password
+- name: Create personal user
+  ansible.builtin.user:
+    name: dylan
+    shell: /bin/bash
+    groups:
+      - sudo
+      - users
+    append: true
+    password: "{{ vault_proxmox_user_dylan['password'] | password_hash('sha512', ('dylan@' ~ inventory_hostname) | hash('sha1') | truncate(16, end='')) }}"
+    state: present
+  no_log: true
