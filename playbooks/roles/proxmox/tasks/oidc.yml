@@ -1,0 +1,50 @@
+---
+
+# root@pam remains available as a break-glass login (via an SSH port forward) if Pocket ID is unavailable
+- name: List authentication realms
+  ansible.builtin.command: pveum realm list --output-format json
+  register: proxmox_realms
+  changed_when: false
+
+# pveum has no create-or-update, so add the realm once and then keep its settings in sync. The client secret is passed
+# on the command line, so hide it from the logs.
+- name: Configure Pocket ID login realm
+  ansible.builtin.command:
+    argv: "{{ ['pveum', 'realm', action, proxmox_oidc_realm] + type + options }}"
+  vars:
+    exists: "{{ proxmox_oidc_realm in proxmox_realms.stdout | from_json | map(attribute='realm') }}"
+    action: "{{ 'modify' if exists else 'add' }}"
+    type: "{{ [] if exists else ['--type', 'openid'] }}"
+    options:
+      - --issuer-url
+      - "{{ proxmox_oidc_issuer_url }}"
+      - --client-id
+      - "{{ vault_pocket_id_clients_proxmox['client_id'] }}"
+      - --client-key
+      - "{{ vault_pocket_id_clients_proxmox['client_secret'] }}"
+      # Pocket ID usernames are unique and readable, unlike the default subject claim
+      - --username-claim
+      - preferred_username
+      # Only users created below may log in
+      - --autocreate
+      - '0'
+      - --default
+      - '1'
+      - --comment
+      - Pocket ID
+  no_log: true
+
+- name: List users
+  ansible.builtin.command: pveum user list --output-format json
+  register: proxmox_users
+  changed_when: false
+
+- name: Create Pocket ID administrators
+  ansible.builtin.command: "pveum user add {{ item }}@{{ proxmox_oidc_realm }} --comment 'Managed by Ansible'"
+  loop: "{{ proxmox_oidc_admins }}"
+  when: (item ~ '@' ~ proxmox_oidc_realm) not in proxmox_users.stdout | from_json | map(attribute='userid')
+
+- name: Grant Pocket ID administrators the Administrator role
+  ansible.builtin.command: "pveum acl modify / --users {{ item }}@{{ proxmox_oidc_realm }} --roles Administrator"
+  loop: "{{ proxmox_oidc_admins }}"
+  changed_when: false

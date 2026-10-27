@@ -4,6 +4,12 @@ proxmox_ssh_user: "{{ vault_ansible['ssh_user'] }}"
 
 proxmox_tunnel_hostname: "proxmox.{{ net_domain }}"
 
+proxmox_oidc_realm: pocket-id
+proxmox_oidc_issuer_url: "https://auth.{{ net_domain }}"
+# Pocket ID usernames that may log in to the UI as administrators
+proxmox_oidc_admins:
+  - dylan
+
 # pveproxy only listens on loopback, API tasks run on the node itself
 proxmox_api_host: 127.0.0.1
 

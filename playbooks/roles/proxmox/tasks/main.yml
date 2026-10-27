@@ -18,6 +18,9 @@
 - name: Expose the Proxmox UI through Cloudflare Tunnel
   ansible.builtin.include_tasks: cloudflared.yml
 
+- name: Configure Pocket ID login
+  ansible.builtin.include_tasks: oidc.yml
+
 - name: Setup VMs with temporary API token
   block:
   - name: Generate temporary Proxmox API token
