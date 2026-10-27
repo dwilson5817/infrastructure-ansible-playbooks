@@ -6,3 +6,10 @@ backups_jobs:
     command: >-
       tar -czf /var/backups/www_minersrealm_net/$(date +\%F).tar.gz -C /srv/www/minersrealm.net www &&
       find /var/backups/www_minersrealm_net -name "*.tar.gz" -mtime +3 -delete
+  pelican_dylanw_net_daily:
+    hour: "01"
+    minute: "05"
+    local_dir: "/var/backups/pelican_dylanw_net"
+    command: >-
+      tar -czf /var/backups/pelican_dylanw_net/$(date +\%F).tar.gz -C /var/lib/docker/volumes pelican_pelican-data/_data pelican_pelican-plugins/_data &&
+      find /var/backups/pelican_dylanw_net -name "*.tar.gz" -mtime +3 -delete
