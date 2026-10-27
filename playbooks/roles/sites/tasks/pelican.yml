@@ -21,6 +21,12 @@
     dest: "/srv/www/{{ net_domain }}/pelican/php-hardening.ini"
     mode: '0644'
 
+- name: Deploy Pelican entrypoint wrapper
+  ansible.builtin.template:
+    src: pelican/entrypoint.sh.j2
+    dest: "/srv/www/{{ net_domain }}/pelican/entrypoint.sh"
+    mode: '0644'
+
 - name: Bring Docker containers up
   community.docker.docker_compose_v2:
     project_src: "/srv/www/{{ net_domain }}/pelican"

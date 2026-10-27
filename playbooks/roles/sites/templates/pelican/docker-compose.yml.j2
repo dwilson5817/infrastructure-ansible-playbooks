@@ -2,6 +2,11 @@ services:
   panel:
     image: ghcr.io/pelican/panel:v1.0.0-rc.2
     restart: always
+    # Restores plugin dependencies lost when the image changes, until
+    # https://github.com/pelican/panel/issues/2323 is fixed.  Overriding the
+    # entrypoint also clears the image's command, so restate it.
+    entrypoint: ["/bin/ash", "/pelican-entrypoint.sh"]
+    command: ["supervisord", "-n", "-c", "/etc/supervisord.conf"]
     networks:
       - default
     ports:
@@ -14,6 +19,7 @@ services:
       - pelican-plugins:/var/www/html/plugins
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./php-hardening.ini:/usr/local/etc/php/conf.d/zzzz-hardening.ini:ro
+      - ./entrypoint.sh:/pelican-entrypoint.sh:ro
     environment:
       XDG_DATA_HOME: /pelican-data
       APP_URL: "https://pelican.{{ net_domain }}"

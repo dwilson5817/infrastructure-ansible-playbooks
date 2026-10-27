@@ -1,0 +1,36 @@
+#!/bin/ash -e
+# shellcheck shell=dash
+# Managed by Ansible.
+#
+# Plugins install their Composer packages into vendor/ and their compiled assets
+# into public/build/, both of which ship with the image rather than living in a
+# volume, so a new image comes up without them.  Restore both before handing over
+# to Pelican's own entrypoint.  The Composer step runs in plugin safe mode,
+# otherwise booting the panel loads the plugins and crashes on the very packages
+# it is trying to install.
+#
+# Remove this wrapper (and the entrypoint/command overrides in the composition)
+# once https://github.com/pelican/panel/issues/2323 is fixed upstream.
+
+cd /var/www/html
+
+if ls plugins/*/plugin.json >/dev/null 2>&1; then
+  echo "Restoring Composer packages for installed plugins"
+  PANEL_PLUGIN_SAFE_MODE=true php artisan p:plugin:composer
+
+  # node_modules is not part of the image, so it only exists once assets have been
+  # built in this container, and a plain restart can skip the build.  A failed
+  # build only leaves plugin styles missing, so keep starting the panel rather
+  # than taking it down with a restart loop.
+  if [ -d node_modules ]; then
+    echo "Plugin assets already built in this container"
+  else
+    echo "Building assets for installed plugins"
+    if ! { yarn install && yarn build; }; then
+      echo "Building plugin assets failed, continuing without them"
+      rm -rf node_modules
+    fi
+  fi
+fi
+
+exec /bin/ash /entrypoint.sh "$@"
