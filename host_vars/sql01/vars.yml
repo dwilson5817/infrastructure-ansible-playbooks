@@ -30,6 +30,7 @@ mariadb_dbs:
 - dylanw_halloween-voting-system-prod
 - dylanw_initiative-tracker-prod
 - dylanw_muckamore-credit-union-website-prod
+- dylanw_pelican
 - dylanw_utility-website-prod
 - miners_panel
 - miners_server
