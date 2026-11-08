@@ -12,7 +12,7 @@
           timeout: 5s
           http:
             method: GET
-            valid_status_codes: [ 200 ]
+            valid_status_codes: [ 200, 204 ]
   - role: prometheus.prometheus.prometheus
     vars:
       ansible_host_key_checking: false
@@ -87,14 +87,19 @@
                 - www.minersrealm.net
                 - panel.minersrealm.net
                 # dylanw.net
-                - "monitoring.{{ net_domain }}"
+                # Grafana's health endpoint, since its root page redirects into the Pocket ID login
+                - "https://monitoring.{{ net_domain }}/api/health"
+                # Pocket ID, returns 204 without touching the database
+                - "https://auth.{{ net_domain }}/healthz"
                 - "mail.{{ net_domain }}"
 #                - "vault.{{ net_domain }}"      # doesn't have port 80 open in AWS
 #                - "prometheus.{{ net_domain }}" # needs authentication
           relabel_configs:
             - source_labels: [__address__]
               target_label: __param_target
+            # Label each probe with just its hostname, without the scheme, port or path
             - source_labels: [__param_target]
+              regex: "(?:https?://)?([^/:]+).*"
               target_label: instance
             - target_label: __address__
               replacement: localhost:9115  # The blackbox exporter's real hostname:port.
