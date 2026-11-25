@@ -26,5 +26,7 @@
     path: /pds/pds.env
     marker: "# ANSIBLE MANAGED BLOCK #"
     block: |
-      PDS_EMAIL_SMTP_URL=smtps://bluesky%40dylanw.dev:VmAdOhzWWYLxTJgZEJjH@mail.dylanw.net/
-      PDS_EMAIL_FROM_ADDRESS=bluesky@dylanw.dev
+      PDS_EMAIL_SMTP_URL=smtps://{{ vault_bluesky_smtp['username'] | urlencode }}:{{ vault_bluesky_smtp['password'] | urlencode }}@mail.dylanw.net/
+      PDS_EMAIL_FROM_ADDRESS={{ vault_bluesky_smtp['from'] }}
+  no_log: true
+  notify: restart pds

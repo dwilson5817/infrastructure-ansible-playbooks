@@ -1,0 +1,6 @@
+---
+
+- name: restart pds
+  ansible.builtin.systemd:
+    name: pds
+    state: restarted

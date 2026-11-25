@@ -1,0 +1,1 @@
+vault_bluesky_smtp: "{{ lookup('community.hashi_vault.vault_kv2_get', 'bluesky/smtp')['secret'] }}"
